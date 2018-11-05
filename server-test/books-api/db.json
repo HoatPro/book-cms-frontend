@@ -1,0 +1,106 @@
+{
+  "books": {
+    "results": [
+      {
+        "id": 1,
+        "title": "Anh hùng xạ điêu",
+        "authors": [
+          {
+            "id": "123sad",
+            "name": "Kim Dung",
+            "slug": "kim-dung.123sad"
+          },
+          {
+            "id": "123sss",
+            "name": "Hoat Pro",
+            "slug": "hoat-pro.123sss"
+          }
+        ],
+        "categories": [
+          {
+            "id": "123sads",
+            "name": "Xuyên không",
+            "slug": "xuyen-khong.123sads"
+          },
+          {
+            "id": "123sada",
+            "name": "Tiên hiệp",
+            "slug": "tien-hiep.123sada"
+          }
+        ],
+        "publishingCompany": "Giáo dục",
+        "publishYear": 2016,
+        "publishMonth": 2,
+        "createdBy": "Juna Phạm",
+        "pageNumber": 250,
+        "status": "Hoàn thành",
+        "slug": "anh-hung-xa-dieu"
+      },
+      {
+        "id": 2,
+        "title": "Đồ long đao",
+        "authors": [
+          {
+            "id": "123sxa",
+            "name": "Cổ Long",
+            "slug": "co-long.123sxa"
+          },
+          {
+            "id": "123qwa",
+            "name": "Vân Dung",
+            "slug": "van-dung.123qwa"
+          }
+        ],
+        "categories": [
+          {
+            "id": "234sss",
+            "name": "Kiếm hiệp",
+            "slug": "kiem-hiep.234sss"
+          },
+          {
+            "id": "234sac",
+            "name": "Tiểu thuyết",
+            "slug": "tieu-thuyet.234sac"
+          }
+        ],
+        "publishingCompany": "Trí tuệ",
+        "publishYear": 2017,
+        "publishMonth": 9,
+        "createdBy": "Na Na",
+        "pageNumber": 250,
+        "status": "Đang xử lý",
+        "slug": "do-long-dao"
+      },
+      {
+        "id": 3,
+        "title": "Vẽ em bằng màu nỗi nhớ",
+        "authors": [
+          {
+            "id": "5642ss",
+            "name": "Băng Tâm",
+            "slug": "bang-tam.5642ss"
+          }
+        ],
+        "categories": [
+          {
+            "id": "5432aaa",
+            "name": "Tiểu thuyết",
+            "slug": "tieu-thuyet.5432aaa"
+          },
+          {
+            "id": "5432asa",
+            "name": "Truyện dài",
+            "slug": "truyen-dai.5432asa"
+          }
+        ],
+        "publishingCompany": "Thanh niên",
+        "publishYear": 2015,
+        "publishMonth": 1,
+        "createdBy": "Văn Phương",
+        "pageNumber": 650,
+        "status": "Hoàn thành",
+        "slug": "ve-em-bang-mau-noi-nho"
+      }
+    ]
+  }
+}

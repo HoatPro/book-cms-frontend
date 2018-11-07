@@ -1,9 +1,9 @@
 export default {
-  home: '/',
+  managerBook: '/manager-book',
   addbook: '/addbook',
   addbookui: '/addbookui',
-  editbook: '/edit',
-  login: '/login',
+  editbook: '/edit/:slug',
+  login: '/',
   register:'/register',
 
 };

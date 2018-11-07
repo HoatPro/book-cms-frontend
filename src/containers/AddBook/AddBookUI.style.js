@@ -2,12 +2,11 @@ import styled from 'styled-components';
 
 const AddbookUIStyle = styled.div`
   margin-top: 10px;
-  font-weight: 700;
   font-family: Arial;
-  font-size: 16px;
   .ant-breadcrumb a {
     font-size: 18px;
     color: black;
+    font-weight: bold;
   }
   h3 {
     margin-top: 10px;
@@ -29,46 +28,51 @@ const AddbookUIStyle = styled.div`
   }
   .ant-form-item-required {
     float: left;
+    font-size: 16px;
+  }
+  .tooltip {
+    font-size: 14px;
   }
   .add_chapter {
     margin-top: 10px;
-    margin-left: 120px;
+    margin-left: 90px;
     height: 40px;
   }
   .upload_chapter {
-    margin-left: 540px;
+    margin-left: 625px;
+  }
+  .upload_chapter button {
+    width: 140px;
+    background-color: #ffa500;
     height: 40px;
-    width: 150px;
-    background-color: #e37b24;
+    color: white;
+  }
+  .upload_chapter button:hover {
+    background-color: #ffbf48;
+    border: none;
+  }
+  .select_action {
+    margin-left: 90px;
+    margin-bottom: 16px;
+    margin-top: 8px;
+    height: 40px;
+    color: #ff6666;
+  }
+  hr {
+    width: 80%;
+    margin-top: 10px;
+    margin-left: 90px;
   }
 
-  hr {
-    width: 95%;
-    margin-top: 10px;
-  }
-  .selectact {
-    width:150px;
-    margin-left: 90px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-  }
-  .selectact dropdown {
-    background-color: #40a9ff;
-  }
   .ant-table-content {
     margin-left: 90px;
     margin-right: 140px;
-  }
-  .ant-select-selection.ant-select-selection--single {
-    width: 150px;
-    height: 40px;
-    font-size: 16px;
   }
 
   .pick_time_puslish {
     width: 322px;
   }
-  .number-page {
+  .number_page {
     width: 322px;
   }
   .ant-pagination.ant-table-pagination {
@@ -104,6 +108,12 @@ const AddbookUIStyle = styled.div`
 
   .select-content select {
     width: 10px;
+  }
+  .ant-table-footer button {
+    margin-left: 720px;
+  }
+  .ant-form-item-label.ant-col-xs-24.ant-col-sm-19 label {
+    float: left;
   }
 `;
 

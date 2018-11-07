@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Form, Icon, Input, Button, Checkbox } from 'antd';
 import { LoginWrapper } from './Login.style';
+
 const FormItem = Form.Item;
 class Login extends Component {
   constructor() {
@@ -82,13 +83,15 @@ class Login extends Component {
               Forgot password
             </a>
             <br />
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="login-form-button"
-            >
-              Log in
-            </Button>
+            <Link to="/manager-book">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="login-form-button"
+              >
+                Log in
+              </Button>
+            </Link>
             &nbsp; Or{' '}
             <Link to="/register" className="FormField__Link">
               Create an account

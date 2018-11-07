@@ -1,8 +1,11 @@
 import React from 'react';
 import { Menu, Icon } from 'antd';
 import { SiderWrapper } from './Layout.style';
-
+import { Link } from 'react-router-dom';
 class Siders extends React.Component {
+  handleClick = () => {
+    window.location.reload();
+  };
   render() {
     return (
       <SiderWrapper>
@@ -14,12 +17,15 @@ class Siders extends React.Component {
             </span>
           </Menu.Item>
 
-          <Menu.Item key="2">
-            <span>
-              <Icon type="book" />
-              <span>Quản lý sách</span>
-            </span>
+          <Menu.Item key="2" onClick={this.handleClick}>
+            <Link to="/manager-book">
+              <span>
+                <Icon type="book" />
+                <span>Quản lý sách</span>
+              </span>
+            </Link>
           </Menu.Item>
+
           <Menu.Item key="3">
             <span>
               <Icon type="bars" />

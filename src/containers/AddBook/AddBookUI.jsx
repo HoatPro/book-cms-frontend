@@ -1,6 +1,7 @@
 import React from 'react';
 import { AddbookUIStyle } from './AddBookUI.style';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import {
   Breadcrumb,
   Form,
@@ -11,165 +12,305 @@ import {
   Icon,
   Upload,
   message,
-  Modal,
   InputNumber,
   Dropdown,
   Menu,
   Table,
+  Tooltip,
+  Modal,
 } from 'antd';
-// import TableAddChapter from './TableAddChapter';
-import TableUploadBook from './TableUploadBook';
+
+// import TableUploadBook from './TableUploadBook';
+//Modal Add and Modal Edit
+import ModalAdd from './ModalAdd';
 const { TextArea } = Input;
 const FormItem = Form.Item;
 const Option = Select.Option;
-const { Column } = Table;
-
 const { MonthPicker } = DatePicker;
 // rowSelection chọn phần tử trong bảng
+const dataz = [];
 const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      'selectedRows: ',
-      selectedRows,
-    );
-  },
-};
-const data = [
-  {
-    key: '1',
-    chapter: 'No data',
-  },
-];
-
-// Kiểm tra upload file
-const props = {
-  name: 'file',
-  action: '//jsonplaceholder.typicode.com/posts/',
-  headers: {
-    authorization: 'authorization-text',
-  },
-  onChange(info) {
-    if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (info.file.status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
+  onChange: selectedRows => {
+    return dataz.push(selectedRows);
   },
 };
 
-function handleChange(value) {
-  console.log(`selected ${value}`);
-}
-function handleBlur() {
-  console.log('blur');
-}
-function handleFocus() {
-  console.log('focus');
-}
 //Tên tác giả
-const children = [];
-children.push(
-  <Option key="nguyen-nhat-anh">Nguyễn Nhật Ánh</Option>,
-  <Option key="nguyen-ngoc-thach">Nguyễn Ngọc Thạch</Option>,
-  <Option key="than-dong">Thần Đồng</Option>,
+const authorsTag = [];
+authorsTag.push(
+  <Option key="5b97800a911f176704c41f6b">sharon l.lechter</Option>,
+  <Option key="5b97800a911f176704c41f6d">robert t. kiyosaki</Option>,
+  <Option key="5b97800a911f176704c41f6f">michael ellsberg</Option>,
+  <Option key="5b97800a911f176704c41f71">jeffrey pfeffer</Option>,
+  <Option key="5b97800a911f176704c41f74">geoffrey g. parker</Option>,
+  <Option key="5bcd8309d91f1a2628f15e22">Nguyễn Nhật Ánh</Option>,
+  <Option key="5bcd837fd91f1a2628f15e25">Nguyễn Ngọc Thạch</Option>,
+  <Option key="5bcd8421d91f1a2628f15e26">Thần Đồng</Option>,
+  <Option key="5bcd8464d91f1a2628f15e27">Trương Kiêt</Option>,
 );
-
+// Creat Form Modal
 class AddBookUI extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       autoCompleteResult: [],
-      selectedRowKeys: [], // Check here to configure the default column
+      selectedRowKeys: [],
       loading: false,
-      visible: false,
-      children: [],
-      disableButton: true, //  disable button 'Thêm sách'
-      value: [], // lấy giá trị title chapter
+      authorsTag: [],
+      disableButton: true, // disable button 'Thêm sách'
+      disaleButtonAdd: false, // disable button 'Thêm chương' nếu chọn Upload
       showTable1: true, // bảng thêm chapter bằng tay
-      showTable2: false, // bảng thêm chapter qua file upload
+      modalTitle: '',
+      modalContent: '',
+      addVisible: false, // visible modal Add
+      editVisible: false, // visible modal Edit
+      chapters: [], // lưu trữ chapter của bảng
+      chaptersUpload: [], //chapter Upload files
+      count: 0,
+      fileName: '',
+      keyModal: null,
+      selectedRow: dataz,
     };
   }
+  getColumns = () => {
+    const columns = [
+      {
+        title: 'Tiêu đề',
+        dataIndex: 'title',
+        key: 'title',
+        width: '80%',
+      },
+      // {
+      //   title: 'Nội dung',
+      //   dataIndex: 'content',
+      //   key: 'content',
+      //   width: '30%',
+      // },
+      {
+        title: 'Lựa chọn',
+        // dataIndex: 'operation',
+        key: 'operation',
+        width: '20%',
+        render: (text, record) => {
+          return this.state.chapters.length >= 1 ? (
+            <div>
+              <Dropdown
+                overlay={
+                  <Menu>
+                    <Menu.Item onClick={() => this.handleEdit(record.key)}>
+                      <a>Chỉnh sửa</a>
+                    </Menu.Item>
+                    <Menu.Item onClick={() => this.handleDelete(record.key)}>
+                      <a>Xóa</a>
+                    </Menu.Item>
+                  </Menu>
+                }
+                placement="bottomLeft"
+              >
+                <Button>
+                  <Icon type="down" theme="outlined" />
+                  Hành động
+                </Button>
+              </Dropdown>
+            </div>
+          ) : null;
+        },
+      },
+    ];
+    return columns;
+  };
   // Submit form
   handleSubmit = e => {
     e.preventDefault();
-    console.log(this.state);
+    let { chapters, chaptersUpload, fileName } = this.state;
+    console.log(chaptersUpload);
     this.props.form.validateFields((err, fieldsValue) => {
       if (err) {
         return;
       }
-      let values = {
-        'Tên sách': fieldsValue['name_book'],
-        'Thể loại': fieldsValue['kind'],
-        'Tác giả': fieldsValue['author'],
-        'Nhà xuất bản': fieldsValue['publishing_company'],
-        'Năm,tháng xuất bản sách': fieldsValue['month_picker'].format(
-          'MM-YYYY',
-        ),
-        'Người dịch': fieldsValue['editor'],
-        'Số trang': fieldsValue['number_page'],
-      };
-      // console.log(values);
-      let path = '/';
+      //API POST BOOK BY UI
+      chapters = chapters.map(chapter => {
+        return {
+          ...chapter,
+          orderNo: chapter.key,
+        };
+      });
+
+      const categories = fieldsValue['categories'].map(category => {
+        return {
+          id: category,
+        };
+      });
+
+      console.log(fieldsValue['categories']);
+
+      fieldsValue['authors'] = fieldsValue['authors'].map(author => {
+        return {
+          id: author,
+        };
+      });
+
+      axios({
+        method: 'POST',
+        url: 'http://localhost:8080/api/v1/books/',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+        data: {
+          title: fieldsValue['title'],
+          publishingCompany: fieldsValue['publishingCompany'],
+          translator: fieldsValue['translator'],
+          categories: categories,
+          authors: fieldsValue['authors'],
+          publicYear: fieldsValue['month_picker'].format('YYYY'),
+          pageNumber: fieldsValue['pageNumber'],
+          fileName: fileName,
+          chapters: chapters.concat(chaptersUpload),
+        },
+      }).then(res => {
+        if (res.status === 200 && res.data.status) {
+          window.location.reload();
+        } else {
+          alert('Upload sách lỗi');
+        }
+      });
+
+      let path = '/manager-book';
       this.props.history.push(path);
-      console.log(this.props.history);
     });
   };
 
   //Function Modal
   showModal = () => {
     this.setState({
-      visible: true,
+      showTable1: true,
     });
   };
-
-  handleOk = e => {
-    console.log(e);
+  setAddVisible(addVisible) {
     this.setState({
-      visible: false,
-      disableButton: false,
+      addVisible,
+      showTable1: true,
     });
-  };
-
-  handleCancel = e => {
-    console.log(e);
-    this.setState({
-      visible: false,
-    });
-  };
-  handleEdit = e => {
-    console.log(e);
-    this.setState({
-      visible: true,
-    });
-  };
-  //Get data in Modal
-  handleChange(event) {
-    this.setState({ value: event.target.value });
-    console.log(event.target.value);
   }
-  handleDelete = e => {
-    this.setState({
-      value: null,
+
+  setEditVisible(editVisible) {
+    this.setState({ editVisible });
+  }
+  handleCancel = () => {
+    this.setState({ addVisible: false, editVisible: false });
+  };
+  //Thêm chương bằng UI
+  handleCreate = () => {
+    const form = this.formRef.props.form;
+    const { count, chapters } = this.state;
+    form.validateFields((err, values) => {
+      if (err) {
+        return;
+      }
+      form.resetFields();
+      const newData = {
+        key: count,
+        title: values.modalTitle,
+        content: values.modalContent,
+      };
+      this.setState({
+        chapters: [...chapters, newData],
+        count: count + 1,
+        addVisible: false,
+        showTable1: true,
+        disableButton: false,
+      });
     });
+  };
+
+  saveFormRef = formRef => {
+    this.formRef = formRef;
+  };
+  //Sửa chương
+  handleEdit = key => {
+    const chapters = [...this.state.chapters];
+    const chapter = chapters.filter(item => item.key === key);
+    this.props.form.setFieldsValue({
+      modalTitleEdit: chapter[0].title,
+      modalContentEdit: chapter[0].content,
+    });
+    this.setState({ editVisible: true, keyModal: key });
+  };
+  handleSave = e => {
+    e.preventDefault();
+    const { keyModal, chapters } = this.state;
+    console.log(chapters[keyModal]);
+    this.props.form.validateFields((err, fieldsValue) => {
+      let values = [
+        fieldsValue['modalTitleEdit'],
+        fieldsValue['modalContentEdit'],
+      ];
+      console.log(values);
+      this.setState({
+        editVisible: false,
+      });
+    });
+  };
+  //Xóa chương
+  handleDelete = key => {
+    const chapters = [...this.state.chapters];
+    this.setState({ chapters: chapters.filter(item => item.key !== key) });
+  };
+  //Xóa chương theo hành động
+  handleDeleteAll = () => {
+    const selectedRows = this.state.selectedRow;
+    const lastIndex = selectedRows.length - 1;
+    console.log(selectedRows[lastIndex]);
   };
   //Function click button Upload ,change TableUploadBook ,disable button 'Thêm chương'
   handleClickTable = () => {
     this.setState({
       showTable1: false,
       showTable2: true,
+      disaleButtonAdd: true,
     });
-  };
-  // Function change author ,add new author
-  handleChangeAuthor = value => {
-    console.log(`selected ${value}`);
   };
 
   render() {
-    const { disableButton, showTable1, showTable2 } = this.state;
+    const {
+      disableButton,
+      disaleButtonAdd,
+      showTable1,
+      chaptersUpload,
+      chapters,
+    } = this.state;
+
+    //API upload book
+    const props = {
+      name: 'file',
+      multiple: true,
+      accept: '.DOCX, .DOC, .TXT',
+      disabled: false,
+      showUploadList: false,
+      withCredentials: true,
+      action: 'http://localhost:8080/api/v1/books/upload-book-content',
+      onChange: info => {
+        const { status } = info.file;
+        if (status === 'done') {
+          const { response } = info.file;
+
+          if (response.status === 1) {
+            this.setState({
+              chaptersUpload: response.results.chapters,
+              fileName: info.file.name,
+              disableButton: false,
+            });
+            message.success(`File ${info.file.name} upload thành công !`);
+          } else {
+            message.warning('Upload không đúng định dạng file!!');
+          }
+        } else if (status === 'error') {
+          message.error(`File ${info.file.name}  upload thất bại !!`);
+        }
+      },
+    };
+
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
       labelCol: {
@@ -184,78 +325,44 @@ class AddBookUI extends React.Component {
     let table;
     if (showTable1) {
       table = (
-        <Table bordered={true} rowSelection={rowSelection} dataSource={data}>
-          <Column
-            title="Chương"
-            dataIndex="chapter"
-            key="chapter"
-            render={() => (
-              <span>
-                <a href="javascript:;">{this.state.value} </a>
-              </span>
-            )}
-          />
-          <Column
-            title="Lựa chọn"
-            dataIndex="choice"
-            key="choice"
-            render={() => (
-              <div>
-                <Dropdown
-                  overlay={
-                    <Menu>
-                      <Menu.Item>
-                        <a onClick={this.showModal}>Chỉnh sửa</a>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <a onClick={this.handleDelete}>Xóa</a>
-                      </Menu.Item>
-                    </Menu>
-                  }
-                  placement="bottomLeft"
-                >
-                  <Button>
-                    <Icon type="down" theme="outlined" />
-                    Lựa chọn
-                  </Button>
-                </Dropdown>
-              </div>
-            )}
-          />
-        </Table>
+        <Table
+          rowClassName={() => 'editable-row'}
+          bordered
+          dataSource={this.state.chapters.concat(chaptersUpload)}
+          columns={this.getColumns()}
+          rowSelection={rowSelection}
+          rowKey={record => record.title}
+        />
       );
-    }
-    if (showTable2) {
-      table = <TableUploadBook />;
     }
 
     return (
       <AddbookUIStyle>
         <Breadcrumb>
           <Breadcrumb.Item>
-            <Link to="/">Quản lý sách</Link>
+            <Link to="/manager-book">Quản lý sách</Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>
             <Link to="/addbookui">Thêm sách bằng giao diện</Link>
           </Breadcrumb.Item>
         </Breadcrumb>
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} chapters={this.state.chapters}>
           <div className="form_add_infobook">
             <FormItem {...formItemLayout} label="Tên sách">
-              {getFieldDecorator('name_book', {
+              {getFieldDecorator('title', {
                 rules: [
                   {
                     required: true,
-                    message: 'Điền tên sách!',
+                    message: 'Tên sách không được để trống!',
                   },
                 ],
-              })(<Input />)}
+              })(<Input onChange={this.onChangeForm} />)}
             </FormItem>
             <FormItem {...formItemLayout} label="Nhà xuất bản">
-              {getFieldDecorator('publishing_company', {
+              {getFieldDecorator('publishingCompany', {
                 rules: [
                   {
-                    required: true,
+                    required: false,
                     message: 'Điền tên nhà xuất bản sách!',
                   },
                 ],
@@ -267,7 +374,7 @@ class AddBookUI extends React.Component {
                 rules: [
                   {
                     type: 'object',
-                    required: true,
+                    required: false,
                     message: 'Chọn năm tháng xuất bản !',
                   },
                 ],
@@ -280,66 +387,96 @@ class AddBookUI extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="Người dịch">
-              {getFieldDecorator('editor', {
+              {getFieldDecorator('translator', {
                 rules: [
                   {
-                    required: true,
+                    required: false,
                     message: 'Điền tên người dịch !',
                   },
                 ],
               })(<Input />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="Tác giả">
-              {getFieldDecorator('author', {
+            <FormItem
+              {...formItemLayout}
+              label={
+                <span>
+                  Tác giả&nbsp;
+                  <Tooltip
+                    title="Nhập tên tác giả và enter, với  những tên không nằm trong danh sách gợi ý sẽ được thêm mới"
+                    className="tooltip"
+                  >
+                    <Icon type="question-circle-o" />
+                  </Tooltip>
+                </span>
+              }
+            >
+              {getFieldDecorator('authors', {
                 rules: [
                   {
-                    required: true,
+                    required: false,
                     message: 'Điền tên tác giả của sách!',
                   },
                 ],
               })(
-                <Select
-                  mode="tags"
-                  placeholder="Tên tác giả"
-                  style={{ width: '100%' }}
-                >
-                  {children}
+                <Select mode="tags" placeholder="Tên tác giả">
+                  {authorsTag}
                 </Select>,
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="Số trang">
-              {getFieldDecorator('number_page', {
+              {getFieldDecorator('pageNumber', {
                 rules: [
                   {
-                    required: true,
-                    message: 'Số trang sách hiện tại !',
+                    required: false,
+                    message: 'Số trang sách hiện tại.',
                   },
                 ],
-              })(<InputNumber name="number_page" className="number-page" />)}
+              })(<InputNumber className="number_page" />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="Thể loại">
-              {getFieldDecorator('kind', {
+            <FormItem
+              {...formItemLayout}
+              label={
+                <span>
+                  Thể loại&nbsp;
+                  <Tooltip
+                    title="Nhập tên thể loại và enter"
+                    className="tooltip"
+                  >
+                    <Icon type="question-circle-o" />
+                  </Tooltip>
+                </span>
+              }
+            >
+              {getFieldDecorator('categories', {
                 rules: [
                   {
-                    required: true,
+                    required: false,
                     message: 'Điền thể loại sách !',
                   },
                 ],
               })(
                 <Select mode="multiple" placeholder="Chọn thể loại">
-                  <Option value="chinhtri">Chính trị </Option>
-                  <Option value="phapluat">Pháp luật </Option>
-                  <Option value="khcn">Khoa học công nghệ </Option>
-                  <Option value="kinhte">Kinh tế</Option>
-                  <Option value="vhxh"> Văn hóa xã hội</Option>
-                  <Option value="lichsu"> Lịch sử</Option>
-                  <Option value="vhnt"> Văn học nghệ thuật</Option>
-                  <Option value="gt"> Giáo trình</Option>
-                  <Option value="truyenngan"> Truyện ngắn</Option>
-                  <Option value="tieuthuyet"> Tiểu thuyết</Option>
-                  <Option value="tamly"> Tâm lý</Option>
-                  <Option value="tongiao"> Tôn giáo</Option>
-                  <Option value="stn"> Sách thiếu nhi</Option>
+                  <Option key="5bcd851a62b4fb262853d6c2">Chính trị</Option>
+                  <Option key="5bcd85ccd91f1a2628f15e29">Pháp luật</Option>
+                  <Option key="5bcd860cd91f1a2628f15e2a">
+                    Khoa học công nghệ
+                  </Option>
+                  <Option key="5bcd8639d91f1a2628f15e2b">Kinh tế</Option>
+                  <Option key="5b977f97911f176704c41f5a">Văn hóa xã hội</Option>
+                  <Option key="5b977f97911f176704c41f5f">
+                    khoa học xã hội
+                  </Option>
+                  <Option key="5b977f97911f176704c41f64">Sách quản trị</Option>
+                  <Option key="5bcd864fd91f1a2628f15e2c">Lịch sử</Option>
+                  <Option key="5bcd8672d91f1a2628f15e2d">
+                    Văn học nghệ thuật
+                  </Option>
+                  <Option key="5bcd86b4d91f1a2628f15e2e">Giáo trình</Option>
+                  <Option key="5bcd86dfd91f1a2628f15e2f">Truyện ngắn</Option>
+                  <Option key="5bcd86f5d91f1a2628f15e30">Tiểu thuyết</Option>
+                  <Option key="5bcd8711d91f1a2628f15e31">Tâm lý</Option>
+                  <Option key="5bcd8722d91f1a2628f15e32">Tôn giáo</Option>
+                  <Option key="5bcd873fd91f1a2628f15e33">Sách thiếu nhi</Option>
                 </Select>,
               )}
             </FormItem>
@@ -349,70 +486,69 @@ class AddBookUI extends React.Component {
             <Button
               type="primary"
               className="add_chapter"
-              onClick={this.showModal}
+              onClick={() => this.setAddVisible(true)}
+              disabled={disaleButtonAdd}
             >
               <Icon type="plus-circle" theme="outlined" />
               Thêm chương
             </Button>
             {/* Modal Add book */}
-            <Modal
-              width={900}
-              className="modal"
-              title="Thêm chương"
-              visible={this.state.visible}
-              onOk={this.handleOk}
+            <ModalAdd
+              wrappedComponentRef={this.saveFormRef}
+              visible={this.state.addVisible}
               onCancel={this.handleCancel}
-              okText="Thêm"
+              onCreate={this.handleCreate}
+            />
+            {/* Modal Edit Book */}
+            <Modal
+              visible={this.state.editVisible}
+              chapters={chapters}
+              onCancel={this.handleCancel}
+              title="Sửa chương"
+              okText="Lưu"
               cancelText="Hủy"
+              width={900}
+              footer={null}
             >
-              <Form layout="vertical">
+              <Form layout="vertical" onSubmit={this.handleSave}>
                 <FormItem label="Tiêu đề">
-                  {getFieldDecorator('title', {
-                    rules: [
-                      {
-                        required: true,
-                        message: 'Tên tiêu đề không được để trống',
-                      },
-                    ],
-                  })(
-                    <Input
-                      placeholder="Tên tiêu đề"
-                      onBlur={this.handleChange.bind(this)}
-                    />,
-                  )}
+                  {getFieldDecorator('modalTitleEdit')(<Input />)}
                 </FormItem>
                 <FormItem label="Nội dung">
-                  {getFieldDecorator('content')(<TextArea rows={16} />)}
+                  {getFieldDecorator('modalContentEdit')(
+                    <TextArea rows={16} />,
+                  )}
+                </FormItem>
+                <FormItem>
+                  <Button onClick={this.handleCancel}>Hủy</Button>
+                  &nbsp;
+                  <Button type="primary" htmlType="submit">
+                    Lưu
+                  </Button>
                 </FormItem>
               </Form>
             </Modal>
-            <Upload {...props} showUploadList={false}>
-              <Button
-                className="upload_chapter"
-                onClick={this.handleClickTable}
-              >
+            <Upload
+              {...props}
+              showUploadList={false}
+              className="upload_chapter"
+            >
+              <Button>
                 <Icon type="upload" /> Tải lên
               </Button>
             </Upload>
             <hr />
-            <div className="selectact">
-              <Select
-                showSearch
-                placeholder="Hành động"
-                style={{ width: 100 }}
-                onChange={handleChange}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-              >
-                <Option value="edit" onClick={this.showModal}>
-                  Chỉnh sửa
-                </Option>
-                <Option value="delete">Xóa</Option>
-                <Option value="analyze">Tách lại </Option>
-              </Select>
-            </div>
 
-            {/* Table input */}
+            <Select
+              className="select_action"
+              style={{ width: 140 }}
+              placeholder="Hành động"
+            >
+              <Option value="delete" onClick={this.handleDeleteAll}>
+                Xóa
+              </Option>
+            </Select>
+            {/* Table */}
             {table}
           </div>
           <Button

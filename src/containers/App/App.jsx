@@ -3,7 +3,7 @@ import { BrowserRouter, Switch, Route, NavLink } from 'react-router-dom';
 import routes from './routes';
 
 import Layout from '../Layout/Layout';
-import Home from '../Home/Home';
+import ManagerBook from '../ManagerBook/ManagerBook';
 import AddBook from '../AddBook/AddBook';
 import AddBookUI from '../AddBook/AddBookUI';
 import EditBook from '../EditBook/EditBook';
@@ -17,7 +17,7 @@ export default function App() {
         <Route exact path={routes.login} component={Login} />
         <Route exact path={routes.register} component={Register} />
         <Layout>
-          <Route exact path={routes.home} component={Home} />
+          <Route exact path={routes.managerBook} component={ManagerBook} />
           <Route path={routes.addbook} component={AddBook} />
           <Route path={routes.addbookui} component={AddBookUI} />
           <Route path={routes.editbook} component={EditBook} />

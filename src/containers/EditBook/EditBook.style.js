@@ -2,17 +2,15 @@ import styled from 'styled-components';
 
 const EditBookWapper = styled.div`
   margin-top: 10px;
-  font-weight: 700;
   font-family: Arial;
   .ant-breadcrumb a {
     font-size: 18px;
     color: black;
+    font-weight: bold;
   }
-
   h3 {
     margin-top: 30px;
   }
-
   h4 {
     margin-top: 30px;
   }
@@ -24,12 +22,16 @@ const EditBookWapper = styled.div`
     padding-left: 100px;
     margin-left: 60px;
   }
+  .ant-form-item-label.ant-col-xs-24.ant-col-sm-18 label {
+    float: left;
+  }
   .ant-row.ant-form-item {
     float: left;
     width: 50%;
   }
   .ant-form-item-required {
     float: left;
+    font-size: 16px;
   }
   .addchapter {
     margin-top: 20px;
@@ -39,7 +41,7 @@ const EditBookWapper = styled.div`
   .uploadchapter {
     margin-left: 640px;
     height: 50px;
-    width: 150px;
+    width: 140px;
     background-color: #00c8bb;
   }
 
@@ -63,12 +65,9 @@ const EditBookWapper = styled.div`
     margin-left: 50px;
     margin-top: 15px;
     margin-bottom: 15px;
+    color: #40a9ff;
   }
-  .ant-select-selection.ant-select-selection--single {
-    width: 150px;
-    height: 40px;
-    font-size: 17px;
-  }
+
   .modalinput {
     margin-top: 20px;
   }
@@ -156,9 +155,8 @@ const EditBookWapper = styled.div`
   }
   .manager_normalization_right button {
     background-color: #fdaf2f;
-    color:white;
+    color: white;
   }
-
 `;
 
 export { EditBookWapper };

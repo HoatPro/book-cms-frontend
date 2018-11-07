@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { Table, Button, Icon, Input, Form } from 'antd';
+import { Table, Button, Input, Form, Checkbox, Icon } from 'antd';
 import { NormalizationWrapper } from './Normalization.style';
 
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
-// Edit row select in table
+
 const EditableRow = ({ form, index, ...props }) => (
   <EditableContext.Provider value={form}>
     <tr {...props} />
@@ -110,11 +110,10 @@ class EditableCell extends React.Component {
     );
   }
 }
-
-// Main table
 class Normalization extends React.Component {
   constructor(props) {
     super(props);
+    this.state = { data: [], label: 'Chưa kiểm tra', dataObj: {} };
     this.columns = [
       {
         title: '#',
@@ -124,75 +123,124 @@ class Normalization extends React.Component {
       },
       {
         title: 'Cụm từ',
-        dataIndex: 'phrase',
-        key: 'phrase',
+        dataIndex: 'key',
+        key: 'key',
         width: '35%',
       },
       {
         title: 'Cách đọc',
-        dataIndex: 'speak',
-        key: 'speak',
+        dataIndex: 'expandation',
+        key: 'expandation',
         width: '30%',
         editable: true,
       },
       {
-        title: '',
-        dataIndex: 'choice',
+        title: 'Kiểm tra',
+        dataIndex: 'operation',
         width: '30%',
-        key: 'choice',
-        render: () => (
-          <div>
-            <Icon type="form" theme="outlined" /> &nbsp;
-            <Button type="primary">Đánh dấu</Button>
-          </div>
-        ),
+        render: record => {
+          return (
+            <Checkbox checked={this.state.checked}>{this.state.label}</Checkbox>
+          );
+        },
       },
     ];
-    this.state = {
-      dataSource: [
-        {
-          key: 1,
-          stt: 1,
-          phrase: '1990năm',
-          speak: 'một nghìn chín trăm chín mươi',
-          choice: '',
-          description: '1990năm có một thiên tài đã phát minh …',
-        },
-        {
-          stt: 2,
-          key: 2,
-          phrase: 'nhữngvết',
-          speak: '',
-          choice: '',
-          description: 'nhữngvết còn lại như một điều chứng minh',
-        },
-        {
-          stt: 3,
-          key: 3,
-          phrase: 'luậnvề',
-          speak: '',
-          choice: '',
-          description: 'các bài luậnvề các vấn đề này , được trình bày ...',
-        },
-      ],
-      count: 3,
-    };
   }
 
+  // save(key) {
+  //   const { dataObj, data } = this.state;
+  //   console.log(dataObj[key]);
+  //   this.setState({
+  //     data: data.map(item => {
+  //       if (item.key !== key) return item;
+  //       delete dataObj[key].editable;
+  //       return {
+  //         ...item,
+  //         expandation: dataObj[key].expandation,
+  //         expandations: item.expandations.map(ex => ({
+  //           ...ex,
+  //           expandation: dataObj[key].expandation,
+  //         })),
+  //       };
+  //     }),
+  //   });
   handleSave = row => {
-    const newData = [...this.state.dataSource];
-    const index = newData.findIndex(item => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
-      ...item,
-      ...row,
+    console.log(row);
+    const { data, dataObj } = this.state;
+    // const newData = [...this.state.data];
+    // const index = newData.findIndex(item => row.key === item.key);
+    // const item = newData[index];
+    // console.log(newData[index]);
+    // newData.splice(index, 1, {
+    //   ...item,
+    //   ...row,
+    // });
+    this.setState({
+      data: data.map(item => {
+        if (item.key !== row.key) return item;
+        delete dataObj[key].editable;
+        return {
+          ...item,
+          expandation: dataObj[key].expandation,
+          expandations: item.expandations.map(ex => ({
+            ...ex,
+            expandation: dataObj[key].expandation,
+          })),
+        };
+      }),
     });
-    this.setState({ dataSource: newData });
+  };
+
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.dataChapterNormalization) return;
+    let normalizationValue = JSON.parse(nextProps.dataChapterNormalization);
+    const { words } = normalizationValue;
+    const dataObj = {};
+    if (words) {
+      words.forEach(word => {
+        dataObj[word.key] = word;
+      });
+    }
+    // JSON.parse(nextProps.dataChapterNormalization).words.map(
+    //   (word, index) => {
+    //     return {
+    //       key: `${word.key}`,
+    //       stt: index + 1,
+    //       phrase: `${word.key}`,
+    //       speak: `${word.expandation}`,
+    //       description: (
+    //         <div
+    //           dangerouslySetInnerHTML={{
+    //             __html: `${word.expandations[0].context}`,
+    //           }}
+    //         />
+    //       ),
+    //       expandation: `${word.expandations[0].expandation}`,
+    //       statusChapter: `${word.status}`,
+    //       checkedList: this.changeStatus(`${word.status}`),
+    //     };
+    //   },
+    // );
+    this.setState({ dataObj, data: words });
+  }
+
+  changeStatus = string => {
+    if (string === 'unchecked') return false;
+    else if (string === 'checked') return true;
+  };
+
+  handleSubmit = e => {
+    e.preventDefault();
+    console.log('a');
   };
 
   render() {
-    const { dataSource } = this.state;
-    const components = { body: { row: EditableFormRow, cell: EditableCell } };
+    const components = {
+      body: {
+        row: EditableFormRow,
+        cell: EditableCell,
+      },
+    };
     const columns = this.columns.map(col => {
       if (!col.editable) {
         return col;
@@ -211,22 +259,37 @@ class Normalization extends React.Component {
     return (
       <NormalizationWrapper>
         <Table
-          components={components}
           rowClassName={() => 'editable-row'}
+          components={components}
           bordered
+          scroll={{ y: 300 }}
           columns={columns}
-          expandRowByClick={true}
-          dataSource={dataSource}
+          dataSource={this.state.data}
+          rowKey={record => record.key}
           expandedRowRender={record => (
-            //   <p style={{ margin: 0 }}>{record.description}</p>
-            // description :đoạn văn chứa cụm từ cần chuẩn hóa
-            <tr className="expand-row">
-              <td className="description">{record.description}</td>
-              <td className="edit-description">
-                <Input />
-                <Button type="primary">Lưu</Button>
-              </td>
-            </tr>
+            //description :đoạn văn chứa cụm từ cần chuẩn hóa
+            <table>
+              <tbody>
+                {record.expandations.map((expand, index) => (
+                  <tr key={index} className="expand-row">
+                    <td
+                      className="description"
+                      dangerouslySetInnerHTML={{
+                        __html: `${expand.context}`,
+                      }}
+                    />
+                    <td className="edit-description">
+                      <Form layout="vertical" onSubmit={this.handleSubmit}>
+                        <Input defaultValue={expand.expandation} />
+                        <Button type="primary" htmlType="submit">
+                          Lưu
+                        </Button>
+                      </Form>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
           onExpand={(expanded, record) => console.log(expanded, record)}
         />

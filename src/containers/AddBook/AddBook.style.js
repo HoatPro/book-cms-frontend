@@ -2,18 +2,20 @@ import styled from 'styled-components';
 
 const AddbookStyle = styled.div`
   margin-top: 10px;
-  font-weight: 700;
   width: 100%;
   font-family: Arial;
   .ant-breadcrumb a {
     font-size: 18px;
     color: black;
+    font-weight:bold;
   }
   sc-bwzfXH llpUzL {
     margin-left: 20px;
   }
   h3 {
     margin-top: 30px;
+    font-size:16px;
+    font-weight:bold;
   }
 
   h4 {

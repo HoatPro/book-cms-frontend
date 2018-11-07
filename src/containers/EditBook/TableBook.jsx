@@ -1,14 +1,28 @@
 import React from 'react';
-import { Table, Select } from 'antd';
+import {
+  Table,
+  Form,
+  Dropdown,
+  Menu,
+  Button,
+  Icon,
+  Modal,
+  Input,
+  Select,
+  message,
+} from 'antd';
 import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { EditBookWapper } from './EditBook.style';
+import Normalization from './Normalization';
+import axios from 'axios';
+import { consolidateStreamedStyles } from 'styled-components';
+const { TextArea } = Input;
 const Option = Select.Option;
+const FormItem = Form.Item;
+// import ModalEdit from './ModalEdit';
 
-function handleChange(value) {
-  console.log(`selected ${value}`);
-}
 function dragDirection(
   dragIndex,
   hoverIndex,
@@ -27,6 +41,15 @@ function dragDirection(
 }
 
 class BodyRow extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: '',
+      content: '',
+      visibleNormalization: false,
+    };
+  }
+
   render() {
     const {
       isOver,
@@ -39,6 +62,7 @@ class BodyRow extends React.Component {
       initialClientOffset,
       ...restProps
     } = this.props;
+
     const style = { ...restProps.style, cursor: 'move' };
 
     let className = restProps.className;
@@ -94,7 +118,6 @@ const rowTarget = {
     monitor.getItem().index = hoverIndex;
   },
 };
-
 const DragableBodyRow = DropTarget('row', rowTarget, (connect, monitor) => ({
   connectDropTarget: connect.dropTarget(),
   isOver: monitor.isOver(),
@@ -107,81 +130,58 @@ const DragableBodyRow = DropTarget('row', rowTarget, (connect, monitor) => ({
     initialClientOffset: monitor.getInitialClientOffset(),
   }))(BodyRow),
 );
-
-const columns = [
-  {
-    title: 'Chương',
-    dataIndex: 'chapter',
-    key: 'chapter',
-  },
-  {
-    title: 'Nội dung',
-    dataIndex: 'content',
-    key: 'content',
-  },
-  {
-    title: 'Lựa chọn',
-    dataIndex: 'choice',
-    key: 'choice',
-    render: () => (
-      <div>
-        <Select
-          placeholder="Chỉnh sửa"
-          style={{ width: 120 }}
-          onChange={handleChange}
-        >
-          <Option value="synthesis">Tổng hợp </Option>
-          <Option value="normalization">Chuẩn hóa</Option>
-          <Option value="delete">Xóa</Option>
-        </Select>
-      </div>
-    ),
-  },
-];
-// rowSelection object indicates the need for row selection
+const dataz = [];
 const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      'selectedRows: ',
-      selectedRows,
-    );
+  onChange: selectedRows => {
+    return dataz.push(selectedRows);
   },
   getCheckboxProps: record => ({
     disabled: record.name === 'Disabled User', // Column configuration not to be checked
     name: record.name,
   }),
+  // onSelectAll: selectedRows => {
+  //   dataz.push(selectedRows.key);
+  // },
 };
 
 class TableBook extends React.Component {
-  state = {
-    data: [
-      {
-        key: '1',
-        chapter: 'Chương 1',
-        content: 'Lời mở đầu',
-        choice: '',
+  constructor(props) {
+    super(props);
+    this.state = {
+      title: '',
+      content: '',
+      visibleAddChapter: false,
+      editVisible: false, // visible modal Edit
+      data: [],
+      objChapters: {},
+      keyModal: null,
+      selectedRow: dataz,
+    };
+  }
+  handleDeleteTable = () => {
+    const { bookId } = this.props;
+    const selectedRows = this.state.selectedRow;
+    const lastIndex = selectedRows.length - 1;
+    axios({
+      method: 'DELETE',
+      url: `http://localhost:8080/api/v1/books/${bookId}/chapters/`,
+      headers: {
+        'Content-Type': 'application/json',
       },
-      {
-        key: '2',
-        chapter: 'Chương 2',
-        content: 'Nhất niệm vĩnh hằng',
-        choice: '',
-      },
-      {
-        key: '3',
-        chapter: 'Chương 3',
-        content: 'Nhất hoa nhất thế giới',
-        choice: '',
-      },
-    ],
+      withCredentials: true,
+      data: selectedRows[lastIndex],
+    }).then(res => {
+      message.success('Xóa chương thành công!');
+      window.location.reload();
+    });
   };
-
   components = {
     body: {
       row: DragableBodyRow,
     },
   };
+
+  // rowSelection object indicates the need for row selection
 
   moveRow = (dragIndex, hoverIndex) => {
     const { data } = this.state;
@@ -195,17 +195,326 @@ class TableBook extends React.Component {
       }),
     );
   };
+  componentWillReceiveProps(nextProps) {
+    const { chapters, objChapters } = nextProps;
+    const data = chapters.map(chapter => {
+      return {
+        key: `${chapter.id}`,
+        title: `${chapter.title}`,
+        content: `${chapter.content}`,
+      };
+    });
+    this.setState({ data, objChapters });
+  }
 
+  getColumns = () => {
+    const columns = [
+      { title: 'Chương', dataIndex: 'title', key: 'title', width: '80%' }, //   title: 'Nội dung', //   dataIndex: 'content', //   key: 'content', // {
+      // },
+      {
+        title: 'Lựa chọn',
+        key: 'choice',
+        width: '20%',
+        render: record => (
+          <div>
+            <Dropdown
+              overlay={
+                <Menu>
+                  <Menu.Item>
+                    <a>Tổng hợp</a>
+                  </Menu.Item>
+                  <Menu.Item>
+                    <a>Chuẩn hóa</a>
+                  </Menu.Item>
+                  <Menu.Item onClick={() => this.handleDelete(record.key)}>
+                    <a>Xóa</a>
+                  </Menu.Item>
+                  <Menu.Item
+                    onClick={() => this.setNormalizationVisible(record.key)}
+                  >
+                    <a>Kiểm tra</a>
+                  </Menu.Item>
+                </Menu>
+              }
+              placement="bottomLeft"
+            >
+              <Button>
+                <Icon
+                  type="down"
+                  theme="outlined"
+                  style={{ color: '#4AA5FF' }}
+                />
+                &nbsp;
+                <a
+                  style={{ color: '#505659' }}
+                  onClick={() => this.setEditVisible(record.key)}
+                >
+                  Chỉnh sửa
+                </a>
+              </Button>
+            </Dropdown>
+          </div>
+        ),
+      },
+    ];
+    return columns;
+  };
+  handleDelete = key => {
+    const { bookId, objChapters } = this.props;
+    const chapterId = objChapters[key].id;
+    axios({
+      method: 'DELETE',
+      url: `http://localhost:8080/api/v1/books/${bookId}/chapters/${chapterId}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    }).then(res => {
+      if (res.status) {
+        message.success('Xóa chương thành công!');
+        window.location.reload();
+      }
+    });
+  };
+  //Thêm chương
+  // Thêm chương trong Detail Book
+  handleAddChapter = visibleAddChapter => {
+    this.setState({
+      visibleAddChapter,
+    });
+  };
+
+  handleCancel = e => {
+    console.log(e);
+    this.setState({
+      visibleAddChapter: false,
+    });
+  };
+  handleSaveAddChapter = () => {
+    const { chapters, bookId } = this.props;
+    if (chapters.length > 0) {
+      const lastIndex = chapters.length - 1;
+      const chapterOrderNo = chapters[lastIndex].orderNo;
+      this.props.form.validateFields((err, fieldsValue) => {
+        axios({
+          method: 'POST',
+          url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+          data: {
+            title: fieldsValue['modalTitleAdd'],
+            content: fieldsValue['modalContentAdd'],
+            orderNo: chapterOrderNo + 1,
+          },
+        }).then(res => {
+          if (res.data.status === 0) {
+            message.error('Thêm chương có orderNo đã tồn tại!!');
+          } else {
+            message.success('Thêm chương thành công !');
+            window.location.reload();
+          }
+        });
+      });
+      this.setState({
+        visibleAddChapter: false,
+      });
+    } else {
+      this.props.form.validateFields((err, fieldsValue) => {
+        axios({
+          method: 'POST',
+          url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+          data: {
+            title: fieldsValue['modalTitleAdd'],
+            content: fieldsValue['modalContentAdd'],
+            orderNo: 1,
+          },
+        }).then(res => {
+          if (res.data.status === 0) {
+            message.error('Thêm chương có orderNo đã tồn tại!!');
+          } else {
+            message.success('Thêm chương thành công !');
+            window.location.reload();
+          }
+        });
+      });
+      this.setState({
+        visibleAddChapter: false,
+      });
+    }
+  };
+  // Hiện modal Edit
+  setEditVisible = key => {
+    const { objChapters } = this.props;
+    this.props.form.setFieldsValue({
+      modalTitleEdit: objChapters[key].title,
+      modalContentEdit: objChapters[key].content,
+    });
+    this.setState({ editVisible: true, keyModal: key });
+  };
+  handleCancel = () => {
+    this.setState({ editVisible: false });
+  };
+
+  handleSave = e => {
+    e.preventDefault();
+    const { keyModal } = this.state;
+    const { bookId, objChapters } = this.props;
+    const chapterId = objChapters[keyModal].id;
+    this.props.form.validateFieldsAndScroll((err, fieldsValue) => {
+      axios({
+        method: 'PUT',
+        url: `http://localhost:8080/api/v1/books/${bookId}/chapters/${chapterId}`,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+        data: {
+          title: fieldsValue['modalTitleEdit'],
+          content: fieldsValue['modalContentEdit'],
+        },
+      }).then(res => {
+        if (res.status) {
+          this.setState({
+            editVisible: false,
+          });
+          message.success('Sửa chương thành công !!');
+          window.location.reload();
+        }
+      });
+    });
+  };
+
+  //Modal Chuẩn hóa
+  setNormalizationVisible = key => {
+    const { objChapters } = this.props;
+    this.setState({
+      dataChapterNormalization: objChapters[key].normalizationValue,
+      visibleNormalization: true,
+    });
+  };
+  handleOk = e => {
+    this.setState({
+      visibleNormalization: false,
+    });
+  };
+  handleCancelModal = () => {
+    this.setState({ visibleNormalization: false });
+  };
   render() {
+    const { chapters, getFieldDecorator, form } = this.props;
+    const { dataChapterNormalization } = this.state;
+
     return (
       <EditBookWapper>
+        {/* Bảng thông tin chapter và lựa chọn hành động cho bảng */}
+        <Select
+          className="selectact"
+          showSearch
+          style={{ width: 120 }}
+          placeholder="Hành động"
+        >
+          <Option
+            value="addchapter"
+            onClick={() => this.handleAddChapter(true)}
+          >
+            Thêm chương
+          </Option>
+          <Option value="synthesis">Tổng hợp</Option>
+          <Option value="normalization">Chuẩn hóa</Option>
+          <Option value="delete" onClick={this.handleDeleteTable}>
+            Xóa
+          </Option>
+        </Select>
         <Table
-          columns={columns}
+          columns={this.getColumns()}
           rowSelection={rowSelection}
           dataSource={this.state.data}
-          components={this.components}
-          onRow={(record, index) => ({ index, moveRow: this.moveRow })}
+          // components={this.components}
+          // onRow={(record, index) => ({ index, moveRow: this.moveRow })}
         />
+        {/* Modal Add  chương */}
+        <div className="modal-add-chapter">
+          <Modal
+            visible={this.state.visibleAddChapter}
+            title="Thêm chương"
+            okText="Thêm"
+            cancelText="Hủy"
+            onCancel={this.handleCancel}
+            width={900}
+            onOk={this.handleSaveAddChapter}
+          >
+            <Form layout="vertical">
+              <FormItem label="Tiêu đề">
+                {getFieldDecorator('modalTitleAdd', {
+                  rules: [
+                    {
+                      required: false,
+                      message: 'Tên tiêu đề không được để trống!!',
+                    },
+                  ],
+                })(<Input />)}
+              </FormItem>
+              <FormItem label="Nội dung">
+                {getFieldDecorator('modalContentAdd')(<TextArea rows={16} />)}
+              </FormItem>
+            </Form>
+          </Modal>
+        </div>
+        {/* Modal Edit chương */}
+        <Modal
+          visible={this.state.editVisible}
+          onCancel={this.handleCancel}
+          title="Sửa chương"
+          okText="Lưu"
+          cancelText="Hủy"
+          width={900}
+          footer={null}
+        >
+          <Form layout="vertical" onSubmit={this.handleSave}>
+            <FormItem label="Tiêu đề">
+              {getFieldDecorator('modalTitleEdit', {
+                rules: [
+                  {
+                    required: false,
+                    message: 'Tên tiêu đề không được để trống!!',
+                  },
+                ],
+              })(<Input />)}
+            </FormItem>
+            <FormItem label="Nội dung">
+              {getFieldDecorator('modalContentEdit')(<TextArea rows={16} />)}
+            </FormItem>
+            <FormItem>
+              <Button onClick={this.handleCancel}>Hủy</Button>
+              &nbsp;
+              <Button type="primary" htmlType="submit">
+                Lưu
+              </Button>
+            </FormItem>
+          </Form>
+        </Modal>
+        {/* Modal chuẩn hóa nội dung */}
+        <div className="modal-normalization">
+          <Modal
+            title="Chuẩn hóa nội dung"
+            visible={this.state.visibleNormalization}
+            okText="Ghi nhận thay đổi"
+            cancelText="Hủy"
+            onCancel={this.handleCancelModal}
+            onOk={this.handleOk}
+            width={1000}
+          >
+            <Normalization
+              dataChapterNormalization={dataChapterNormalization}
+            />
+          </Modal>
+        </div>
       </EditBookWapper>
     );
   }

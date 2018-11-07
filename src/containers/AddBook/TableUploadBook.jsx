@@ -1,22 +1,96 @@
 import React from 'react';
-import { Table } from 'antd';
+import { Table, Button, Dropdown, Menu, Icon } from 'antd';
+class TableUploadBook extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [],
+    };
+  }
+  componentWillReceiveProps(nextProps) {
+    const data = chaptersUpload.map(chapterUpload => {
+      return {
+        key: `${chapterUpload.orderNo}`,
+        title: `Chương ${chapterUpload.orderNo} : ${chapterUpload.title}`,
+        content: `${chapterUpload.content}`,
+      };
+    });
+    this.setState({
+      data,
+      disableButton: nextProps.disableButton,
+      disableButton: false,
+    });
+  }
+  // handleFooter = () => {
+  //   return (
+  //     <Button type="primary" onClick={() => this.handleConfirm()}>
+  //       Xác nhận
+  //     </Button>
+  //   );
+  // };
+  handleConfirm = () => {
+    console.log(this.state);
+    this.setState({ disableButton: false });
+  };
 
-const { Column } = Table;
+  getColumns = () => {
+    const columns = [
+      {
+        title: 'Chương',
+        dataIndex: 'title',
+        key: 'title',
+        width: '80%',
+      },
 
-class TableAddChapter extends React.Component {
+      {
+        title: 'Lựa chọn',
+        key: 'operation',
+        width: '20%',
+        render: (text, record) => {
+          return this.props.chaptersUpload.length >= 1 ? (
+            <div>
+              <Dropdown
+                overlay={
+                  <Menu>
+                    <Menu.Item onClick={() => this.handleEdit(record.key)}>
+                      <a>Chỉnh sửa</a>
+                    </Menu.Item>
+                    <Menu.Item onClick={() => this.handleDelete(record.key)}>
+                      <a>Xóa</a>
+                    </Menu.Item>
+                  </Menu>
+                }
+                placement="bottomLeft"
+              >
+                <Button>
+                  <Icon type="down" theme="outlined" />
+                  Hành động
+                </Button>
+              </Dropdown>
+            </div>
+          ) : null;
+        },
+      },
+    ];
+    return columns;
+  };
+
   render() {
+    const { chaptersUpload, disableButton } = this.props;
+
     return (
-      <Table bordered={true}>
-        <Column title="CHƯƠNG" dataIndex="chapter" key="chapter" width="20%" />
-        <Column
-          title="NỘI DUNG SÁCH"
-          dataIndex="content"
-          key="content"
-          width="80%"
-        />
-      </Table>
+      <Table
+        dataSource={this.state.data}
+        columns={this.getColumns()}
+        bordered={true}
+        pagination={false}
+        scroll={{ y: 450 }}
+        rowKey={record => record.key}
+        // footer={this.handleFooter}
+        disableButton={disableButton}
+      />
     );
   }
 }
 
-export default TableAddChapter;
+export default TableUploadBook;

@@ -35,7 +35,7 @@ class AddBook extends React.Component {
       <AddbookStyle>
         <Breadcrumb>
           <Breadcrumb.Item>
-            <Link to="/">Quản lý sách</Link>
+            <Link to="/manager-book">Quản lý sách</Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>
             <Link to="/addbook">Thêm sách</Link>

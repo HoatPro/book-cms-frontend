@@ -6,19 +6,31 @@ const NormalizationWrapper = styled.div`
   font-size: 2rem;
   font-weight: 700;
   .expand-row {
-    width: 90%;
+    width: 100%;
+  }
+  .ant-table-tbody tr {
+    /* background-color:#ff9191 */
   }
   .description {
-    width: 60%;
+    width: 39%;
+    height: 200px;
     float: left;
-    font-weight:normal;
+    font-weight: normal;
   }
   .edit-description {
-    width: 40%;
-    margin-right: 170px;
+    float: left;
+    width: 30%;
+    margin-left: 20px;
   }
-  .edit-description button{
-      margin-top:5px;
+  .edit-description input {
+    float: left;
+    width: 65%;
+  }
+  .edit-description button {
+    margin-left: 10px;
+  }
+  .editable-row-operations icon-dex {
+   margin-left:10px;
   }
 `;
 

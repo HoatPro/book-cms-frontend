@@ -123,7 +123,7 @@ class AddBookUI extends React.Component {
   handleSubmit = e => {
     e.preventDefault();
     let { chapters, chaptersUpload, fileName } = this.state;
-    console.log(chaptersUpload);
+
     this.props.form.validateFields((err, fieldsValue) => {
       if (err) {
         return;
@@ -142,7 +142,6 @@ class AddBookUI extends React.Component {
         };
       });
 
-      console.log(fieldsValue['categories']);
 
       fieldsValue['authors'] = fieldsValue['authors'].map(author => {
         return {
@@ -240,14 +239,20 @@ class AddBookUI extends React.Component {
   handleSave = e => {
     e.preventDefault();
     const { keyModal, chapters } = this.state;
-    console.log(chapters[keyModal]);
     this.props.form.validateFields((err, fieldsValue) => {
       let values = [
         fieldsValue['modalTitleEdit'],
         fieldsValue['modalContentEdit'],
       ];
-      console.log(values);
       this.setState({
+        chapters: chapters.map(item => {
+          if (item.key !== keyModal) return item;
+          return {
+            ...item,
+            title: values[0],
+            content: values[1],
+          };
+        }),
         editVisible: false,
       });
     });

@@ -15,7 +15,7 @@ import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 import { EditBookWapper } from './EditBook.style';
-import Normalization from './Normalization';
+import ModalNormalization from './ModalNormalization';
 import axios from 'axios';
 import { consolidateStreamedStyles } from 'styled-components';
 const { TextArea } = Input;
@@ -156,6 +156,7 @@ class TableBook extends React.Component {
       objChapters: {},
       keyModal: null,
       selectedRow: dataz,
+      loading: false,
     };
   }
   handleDeleteTable = () => {
@@ -209,52 +210,40 @@ class TableBook extends React.Component {
 
   getColumns = () => {
     const columns = [
-      { title: 'Chương', dataIndex: 'title', key: 'title', width: '80%' }, //   title: 'Nội dung', //   dataIndex: 'content', //   key: 'content', // {
-      // },
+      { title: 'Chương', dataIndex: 'title', key: 'title', width: '80%' },
       {
         title: 'Lựa chọn',
         key: 'choice',
         width: '20%',
-        render: record => (
-          <div>
-            <Dropdown
-              overlay={
-                <Menu>
-                  <Menu.Item>
-                    <a>Tổng hợp</a>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <a>Chuẩn hóa</a>
-                  </Menu.Item>
-                  <Menu.Item onClick={() => this.handleDelete(record.key)}>
-                    <a>Xóa</a>
-                  </Menu.Item>
-                  <Menu.Item
-                    onClick={() => this.setNormalizationVisible(record.key)}
-                  >
-                    <a>Kiểm tra</a>
-                  </Menu.Item>
-                </Menu>
-              }
-              placement="bottomLeft"
-            >
-              <Button>
-                <Icon
-                  type="down"
-                  theme="outlined"
-                  style={{ color: '#4AA5FF' }}
-                />
-                &nbsp;
-                <a
-                  style={{ color: '#505659' }}
-                  onClick={() => this.setEditVisible(record.key)}
-                >
-                  Chỉnh sửa
-                </a>
-              </Button>
-            </Dropdown>
-          </div>
-        ),
+        render: record => {
+          const menu = (
+            <Menu>
+              <Menu.Item>
+                <a>Tổng hợp</a>
+              </Menu.Item>
+              <Menu.Item>
+                <a>Chuẩn hóa</a>
+              </Menu.Item>
+              <Menu.Item onClick={() => this.handleDelete(record.key)}>
+                <a>Xóa</a>
+              </Menu.Item>
+              <Menu.Item
+                onClick={() => this.setNormalizationVisible(record.key)}
+              >
+                <a>Kiểm tra</a>
+              </Menu.Item>
+            </Menu>
+          );
+          return (
+              <Dropdown.Button
+                style={{ color: '#505659' }}
+                onClick={() => this.setEditVisible(record.key)}
+                overlay={menu}
+              >
+                Chỉnh sửa
+            </Dropdown.Button>
+          )
+        },
       },
     ];
     return columns;
@@ -283,7 +272,6 @@ class TableBook extends React.Component {
       visibleAddChapter,
     });
   };
-
   handleCancel = e => {
     console.log(e);
     this.setState({
@@ -295,6 +283,7 @@ class TableBook extends React.Component {
     if (chapters.length > 0) {
       const lastIndex = chapters.length - 1;
       const chapterOrderNo = chapters[lastIndex].orderNo;
+
       this.props.form.validateFields((err, fieldsValue) => {
         axios({
           method: 'POST',
@@ -395,20 +384,18 @@ class TableBook extends React.Component {
     const { objChapters } = this.props;
     this.setState({
       dataChapterNormalization: objChapters[key].normalizationValue,
+      dataNormalization: objChapters[key],
       visibleNormalization: true,
     });
   };
-  handleOk = e => {
+  closeModal = visible => {
     this.setState({
-      visibleNormalization: false,
+      visibleNormalization: visible,
     });
   };
-  handleCancelModal = () => {
-    this.setState({ visibleNormalization: false });
-  };
+
   render() {
     const { chapters, getFieldDecorator, form } = this.props;
-    const { dataChapterNormalization } = this.state;
 
     return (
       <EditBookWapper>
@@ -435,6 +422,7 @@ class TableBook extends React.Component {
           columns={this.getColumns()}
           rowSelection={rowSelection}
           dataSource={this.state.data}
+          loading={this.state.loading}
           // components={this.components}
           // onRow={(record, index) => ({ index, moveRow: this.moveRow })}
         />
@@ -501,19 +489,12 @@ class TableBook extends React.Component {
         </Modal>
         {/* Modal chuẩn hóa nội dung */}
         <div className="modal-normalization">
-          <Modal
-            title="Chuẩn hóa nội dung"
+          <ModalNormalization
             visible={this.state.visibleNormalization}
-            okText="Ghi nhận thay đổi"
-            cancelText="Hủy"
-            onCancel={this.handleCancelModal}
-            onOk={this.handleOk}
-            width={1000}
-          >
-            <Normalization
-              dataChapterNormalization={dataChapterNormalization}
-            />
-          </Modal>
+            dataChapterNormalization={this.state.dataChapterNormalization}
+            dataNormalization={this.state.dataNormalization}
+            closeModal={this.closeModal}
+          />
         </div>
       </EditBookWapper>
     );

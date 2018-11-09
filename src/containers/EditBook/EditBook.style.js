@@ -74,7 +74,7 @@ const EditBookWapper = styled.div`
   .btn-submit {
     float: right;
     margin-right: 200px;
-    margin-top: 12px;
+    margin-top: 55px;
     width: 100px;
     font-size: 16px;
   }
@@ -85,6 +85,7 @@ const EditBookWapper = styled.div`
 
   .delete {
     margin-left: 30px;
+    margin-bottom:20px;
     font-family: Arial;
   }
   .delete h4 {
@@ -92,13 +93,13 @@ const EditBookWapper = styled.div`
     color: red;
     font-size: 16px;
   }
-  #components-table-demo-drag-sorting tr.drop-over-downward td {
+  /* #components-table-demo-drag-sorting tr.drop-over-downward td {
     border-bottom: 2px dashed #1890ff;
   }
 
   #components-table-demo-drag-sorting tr.drop-over-upward td {
     border-top: 2px dashed #1890ff;
-  }
+  } */
   .editable-cell {
     position: relative;
   }
@@ -115,7 +116,7 @@ const EditBookWapper = styled.div`
   }
   .allbook {
     width: 95%;
-    height: 240px;
+    height: 600px;
     margin-top: 35px;
     font-family: Arial;
     margin-left: 30px;
@@ -125,6 +126,7 @@ const EditBookWapper = styled.div`
     color: #fda103;
   }
   .allbook h4 {
+    margin-top:31px;
     font-weight: bold;
   }
   .allbook p {
@@ -132,26 +134,30 @@ const EditBookWapper = styled.div`
   }
   .manager_synthesis {
     padding-left: 18px;
-    height: 50%;
+    height: 78%
     border: 1px solid #ddd;
+    border-bottom:none;
   }
   .manager_normalization {
     padding-left: 18px;
-    height: 50%;
+    height: 22%;
     border: 0.5px solid #ddd;
   }
   .manager_synthesis_left {
     float: left;
   }
   .manager_synthesis_right {
-    margin-left: 400px;
-    width: 60%;
+    margin-left: 250px;
+    width: 75%;
   }
+   .manager_synthesis_right button{
+     margin-bottom:15px;
+   }
   .manager_normalization_left {
     float: left;
   }
   .manager_normalization_right {
-    margin-left: 400px;
+    margin-left: 250px;
   }
   .manager_normalization_right button {
     background-color: #fdaf2f;

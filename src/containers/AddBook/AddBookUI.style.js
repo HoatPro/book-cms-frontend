@@ -109,9 +109,7 @@ const AddbookUIStyle = styled.div`
   .select-content select {
     width: 10px;
   }
-  .ant-table-footer button {
-    margin-left: 720px;
-  }
+
   .ant-form-item-label.ant-col-xs-24.ant-col-sm-19 label {
     float: left;
   }

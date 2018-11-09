@@ -2,7 +2,7 @@ import React from 'react';
 import { EditBookWapper } from './EditBook.style';
 import { Link } from 'react-router-dom';
 import TableBook from './TableBook';
-
+import TableSynthesis from './TableSynthesis';
 import axios from 'axios';
 import { Breadcrumb, Form, Input, Select, Button, Modal, message } from 'antd';
 
@@ -132,7 +132,8 @@ class EditBook extends React.Component {
           withCredentials: true,
         }).then(response => {
           if (response.status === 200 && response.data.status === 1) {
-            alert('Chuẩn hóa dữ liệu sách thành công');
+            message.info('Chuẩn hóa sách thành công đưa vào hàng đợi...');
+            window.location.reload();
           }
         });
       },
@@ -353,6 +354,7 @@ class EditBook extends React.Component {
             <div className="manager_synthesis_right">
               <h4>Quản lý tổng hợp</h4>
               <Button type="primary">Tổng hợp</Button>
+              <TableSynthesis />
             </div>
           </div>
           <div className="manager_normalization">
@@ -373,7 +375,6 @@ class EditBook extends React.Component {
           <h4>Nhấn vào đây để xóa</h4>
           <Button type="danger">Delete</Button>
         </div>
-        <hr />
       </EditBookWapper>
     );
   }

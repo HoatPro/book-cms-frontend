@@ -3,13 +3,18 @@ import { BrowserRouter, Switch, Route, NavLink } from 'react-router-dom';
 import routes from './routes';
 
 import Layout from '../Layout/Layout';
+import DashBoard from '../DashBoard/DashBoard';
 import ManagerBook from '../ManagerBook/ManagerBook';
-import AddBook from '../AddBook/AddBook';
-import AddBookUI from '../AddBook/AddBookUI';
-import EditBook from '../EditBook/EditBook';
+import AddBook from '../ManagerBook/AddBook/AddBook';
+import AddBookUI from '../ManagerBook/AddBook/AddBookUI';
+import EditBook from '../ManagerBook/EditBook/EditBook';
 import Login from '../Login/Login';
 import Register from '../Register/Register';
-
+import ManagerAuthor from '../ManagerAuthor/ManagerAuthor';
+import ManagerCategory from '../ManagerCategory/ManagerCategory';
+import UsersRoles from '../UsersAndRoles/UsersRoles';
+import AddUser from '../UsersAndRoles/AddUser';
+import DetailUser from '../UsersAndRoles/DetailUser';
 export default function App() {
   return (
     <BrowserRouter>
@@ -17,10 +22,27 @@ export default function App() {
         <Route exact path={routes.login} component={Login} />
         <Route exact path={routes.register} component={Register} />
         <Layout>
-          <Route exact path={routes.managerBook} component={ManagerBook} />
-          <Route path={routes.addbook} component={AddBook} />
-          <Route path={routes.addbookui} component={AddBookUI} />
-          <Route path={routes.editbook} component={EditBook} />
+          <Switch>
+            <Route exact path={routes.dashboard} component={DashBoard} />
+            <Route exact path={routes.managerBook} component={ManagerBook} />
+
+            <Route path={routes.addbook} component={AddBook} />
+            <Route path={routes.addbookui} component={AddBookUI} />
+            <Route path={routes.editbook} component={EditBook} />
+            <Route
+              exact
+              path={routes.managerAuthor}
+              component={ManagerAuthor}
+            />
+            <Route
+              exact
+              path={routes.managerCategory}
+              component={ManagerCategory}
+            />
+            <Route exact path={routes.userAndRole} component={UsersRoles} />
+            <Route path={routes.addUser} component={AddUser} />
+            <Route path={routes.detailUser} component={DetailUser} />
+          </Switch>
         </Layout>
       </Switch>
     </BrowserRouter>

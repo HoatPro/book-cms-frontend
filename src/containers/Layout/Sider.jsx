@@ -10,14 +10,16 @@ class Siders extends React.Component {
     return (
       <SiderWrapper>
         <Menu>
-          <Menu.Item key="1">
-            <span>
-              <Icon type="home" />
-              <span>Tổng quan </span>
-            </span>
+          <Menu.Item>
+            <Link to="/partner" onClick={this.handleClick}>
+              <span>
+                <Icon type="home" />
+                <span>Tổng quan </span>
+              </span>
+            </Link>
           </Menu.Item>
 
-          <Menu.Item key="2" onClick={this.handleClick}>
+          <Menu.Item onClick={this.handleClick}>
             <Link to="/manager-book">
               <span>
                 <Icon type="book" />
@@ -26,29 +28,35 @@ class Siders extends React.Component {
             </Link>
           </Menu.Item>
 
-          <Menu.Item key="3">
-            <span>
-              <Icon type="bars" />
-              <span>Quản lý thể loại</span>
-            </span>
+          <Menu.Item>
+            <Link to="/manager-category" onClick={this.handleClick}>
+              <span>
+                <Icon type="bars" />
+                <span>Quản lý thể loại</span>
+              </span>
+            </Link>
           </Menu.Item>
-          <Menu.Item key="4">
-            <span>
-              <Icon type="appstore" />
-              <span>Quản lý tác giả</span>
-            </span>
+          <Menu.Item>
+            <Link to="/manager-author" onClick={this.handleClick}>
+              <span>
+                <Icon type="appstore" />
+                <span>Quản lý tác giả</span>
+              </span>
+            </Link>
           </Menu.Item>
-          <Menu.Item key="5">
+          <Menu.Item>
             <span>
               <Icon type="bar-chart" />
               <span>Thống kê</span>
             </span>
           </Menu.Item>
-          <Menu.Item key="6">
-            <span>
-              <Icon type="team" />
-              <span>Người dùng và quyền</span>
-            </span>
+          <Menu.Item>
+            <Link to="/user-role" onClick={this.handleClick}>
+              <span>
+                <Icon type="team" />
+                <span>Người dùng và quyền</span>
+              </span>
+            </Link>
           </Menu.Item>
         </Menu>
       </SiderWrapper>

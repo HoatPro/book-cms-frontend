@@ -14,7 +14,7 @@ const LayoutWrapper = styled.div`
   }
   .main_wrapper {
     width: 100%;
-    height: auto;
+    height: 100%;
     border: 1px solid #ddd;
   }
   .sidebar {
@@ -26,6 +26,7 @@ const LayoutWrapper = styled.div`
 
   .content {
     width: 85%;
+    height:auto;
     margin-left: 204px;
     border:1px solid #ddd;
     border-bottom-color:white;
@@ -63,7 +64,6 @@ const SiderWrapper = styled.div`
 const ContentWrapper = styled.div`
     background-color: white;
     padding-left: 20px;
-
   hr {
     border: 1px solid #ddd;
   }

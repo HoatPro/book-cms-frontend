@@ -99,11 +99,18 @@ class ManagerBook extends React.Component {
   render() {
     const { data } = this.state;
     const columns = [
-      { title: 'Tên sách', dataIndex: 'title', key: 'title', sorter: true },
+      {
+        title: 'Tên sách',
+        dataIndex: 'title',
+        key: 'title',
+        width: '10%',
+        sorter: true,
+      },
       {
         title: 'Tác giả',
         dataIndex: 'authors',
         key: 'authors',
+        width: '20%',
         sorter: true,
         render: record => {
           return record.map(author => author.name).join(', ');
@@ -113,6 +120,7 @@ class ManagerBook extends React.Component {
         title: 'Thể loại',
         dataIndex: 'categories',
         key: 'categories',
+        width: '20%',
         sorter: true,
         render: record => {
           return record.map(categories => categories.name).join(', ');
@@ -122,10 +130,15 @@ class ManagerBook extends React.Component {
         title: 'Năm xuất bản',
         dataIndex: 'publicYear',
         key: 'publicYear',
-        width: '12%',
+        width: '10%',
         sorter: true,
       },
-      { title: 'Người tạo', dataIndex: 'createdBy', key: 'createdBy' },
+      {
+        title: 'Người tạo',
+        dataIndex: 'createdBy',
+        key: 'createdBy',
+        width: '15%',
+      },
       {
         title: 'Trạng thái',
         dataIndex: 'status',
@@ -184,20 +197,14 @@ class ManagerBook extends React.Component {
           </Button>
           <hr />
           <div>
-            <div className="table-operations">
+            <div>
               <Select
                 showSearch
                 style={{ width: 180 }}
                 placeholder="Lựa chọn hành động"
-                optionFilterProp="children"
                 onChange={handleChange}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                filterOption={(input, option) =>
-                  option.props.children
-                    .toLowerCase()
-                    .indexOf(input.toLowerCase()) >= 0
-                }
               >
                 <Option value="normalization">Chuẩn hóa</Option>
                 <Option value="synthesis">Tổng hợp</Option>
@@ -213,11 +220,6 @@ class ManagerBook extends React.Component {
               loading={this.state.loading}
               onChange={this.handleTableChange}
               rowKey={record => record.id}
-              // onRow={record => ({
-              //   onDoubleClick: () => {
-              //     this.handleClick();
-              //   },
-              // })}
             />
           </div>
         </div>

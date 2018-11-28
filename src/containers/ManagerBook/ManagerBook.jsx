@@ -3,6 +3,7 @@ import { Icon, Input, Button, Table, Select, Dropdown, Menu } from 'antd';
 import { ManagerBookWrapper } from './ManagerBook.style';
 import { Link } from 'react-router-dom';
 import reqwest from 'reqwest';
+import axios from 'axios';
 const Search = Input.Search;
 const Option = Select.Option;
 // const fields = 'title,createdBy,publicYear,categories,authors';
@@ -12,15 +13,6 @@ const rowSelection = {
   },
 };
 
-function handleChange(value) {
-  console.log(`selected ${value}`);
-}
-function handleBlur() {
-  console.log('blur');
-}
-function handleFocus() {
-  console.log('focus');
-}
 class ManagerBook extends React.Component {
   constructor(props) {
     super(props);
@@ -28,66 +20,61 @@ class ManagerBook extends React.Component {
       data: [],
       pagination: {},
       loading: false,
+      filteredInfo: null,
+      sortedInfo: null,
+      keyword: '',
     };
   }
 
-  handleTableChange = (pagination, filters, sorter) => {
-    const pager = { ...this.state.pagination };
-    pager.current = pagination.current;
-    this.setState({
-      pagination: pager,
-    });
-    this.fetch({
-      results: pagination.pageSize,
-      page: pagination.current,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-      ...filters,
-    });
-  };
-
-  fetch = (params = {}) => {
-    console.log('params:', params);
+  callApi = (params = {}) => {
     this.setState({ loading: true });
     reqwest({
-      url: `http://localhost:8080/api/v1/books?fields=title,createdBy,publicYear,categories,authors,status,slug,translator,pageNumber,fileName`,
+      url: `http://localhost:8080/api/v1/books?fields=title,createdBy,publicYear,categories,authors,status,slug,translator,pageNumber`,
       method: 'GET',
       withCredentials: true,
       data: {
-        results: 5,
+        results: 10,
         ...params,
       },
       type: 'json',
     }).then(data => {
       const pagination = { ...this.state.pagination };
       // Read total count from server
-      // pagination.total = data.totalCount;
-      pagination.total = 20;
+      pagination.total = 10 * data.results.totalPages;
       this.setState({
         loading: false,
         data: data.results.items,
         pagination,
       });
-      // console.log(data.results.items);
     });
   };
 
   componentDidMount() {
-    this.fetch();
+    this.callApi();
   }
-
-  handleChange = (pagination, sorter) => {
-    console.log('Various parameters', pagination, sorter);
+  handleTableChange = (pagination, filters, sorter) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
     this.setState({
+      pagination: pager,
       sortedInfo: sorter,
     });
+    if (filters.status === null || sorter === {}) {
+      this.callApi({
+        results: pagination.pageSize,
+        page: pagination.current - 1,
+        keyword: this.state.keyword,
+      });
+    } else {
+      this.callApi({
+        results: pagination.pageSize,
+        page: pagination.current - 1,
+        keyword: this.state.keyword,
+        statusIds: filters.status[0],
+      });
+    }
   };
 
-  clearAll = () => {
-    this.setState({
-      sortedInfo: null,
-    });
-  };
   // handleClick = () => {
   //   const { data } = this.state;
   //   console.log(data);
@@ -95,23 +82,48 @@ class ManagerBook extends React.Component {
   //   this.props.history.push(path);
   //   console.log(this.props.history);
   // };
-
+  //chuẩn hóa keyword
+  standardized = string => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+  // Tìm kiếm
+  onSearch = keyword => {
+    let keywordUp = this.standardized(keyword);
+    this.setState({ keyword: keywordUp });
+    axios({
+      method: 'GET',
+      url: `http://localhost:8080/api/v1/books?keyword=${keywordUp}&size=10`,
+      withCredentials: true,
+    }).then(res => {
+      if (res.status) {
+        const dataTable = res.data.results.items;
+        const pagination = { ...this.state.pagination };
+        // Read total count from server
+        pagination.total = 10 * res.data.results.totalPages;
+        this.setState({
+          loading: false,
+          data: dataTable,
+          pagination,
+        });
+      }
+    });
+  };
   render() {
-    const { data } = this.state;
+    let { sortedInfo, filteredInfo } = this.state;
+    sortedInfo = sortedInfo || {};
+    filteredInfo = filteredInfo || {};
     const columns = [
       {
         title: 'Tên sách',
         dataIndex: 'title',
         key: 'title',
-        width: '10%',
-        sorter: true,
+        width: '15%',
       },
       {
         title: 'Tác giả',
         dataIndex: 'authors',
         key: 'authors',
-        width: '20%',
-        sorter: true,
+        width: '15%',
         render: record => {
           return record.map(author => author.name).join(', ');
         },
@@ -121,7 +133,6 @@ class ManagerBook extends React.Component {
         dataIndex: 'categories',
         key: 'categories',
         width: '20%',
-        sorter: true,
         render: record => {
           return record.map(categories => categories.name).join(', ');
         },
@@ -131,7 +142,8 @@ class ManagerBook extends React.Component {
         dataIndex: 'publicYear',
         key: 'publicYear',
         width: '10%',
-        sorter: true,
+        sorter: (a, b) => a.publicYear - b.publicYear,
+        sortOrder: sortedInfo.columnKey === 'publicYear' && sortedInfo.order,
       },
       {
         title: 'Người tạo',
@@ -143,7 +155,18 @@ class ManagerBook extends React.Component {
         title: 'Trạng thái',
         dataIndex: 'status',
         key: 'status',
-        sorter: true,
+        filters: [
+          { text: 'Chưa có nội dung', value: 0 },
+          { text: 'Đã có nội dung', value: 1 },
+          { text: 'Đang chuẩn hóa', value: 2 },
+          { text: 'Đã chuẩn hóa', value: 3 },
+          { text: 'Sẵn sàng tổng hợp', value: 4 },
+          { text: 'Đang tổng hợp', value: 5 },
+          { text: 'Tổng hợp lỗi', value: 6 },
+          { text: 'Tổng hợp thành công', value: 7 },
+        ],
+        filteredValue: filteredInfo.name || null,
+        onFilter: record => record.name,
         render: status => {
           return status.name;
         },
@@ -151,7 +174,6 @@ class ManagerBook extends React.Component {
       {
         title: 'Hành động',
         key: 'action',
-
         render: record => (
           <div>
             <Dropdown
@@ -187,7 +209,7 @@ class ManagerBook extends React.Component {
         <div className="home_content">
           <Search
             placeholder="Tìm kiếm tên sách,tác giả ,thể loại..."
-            onSearch={value => console.log(value)}
+            onSearch={keyword => this.onSearch(keyword)}
           />
           <Button className="add_book" type="primary">
             <Link to="/addbook">
@@ -202,9 +224,6 @@ class ManagerBook extends React.Component {
                 showSearch
                 style={{ width: 180 }}
                 placeholder="Lựa chọn hành động"
-                onChange={handleChange}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
               >
                 <Option value="normalization">Chuẩn hóa</Option>
                 <Option value="synthesis">Tổng hợp</Option>
@@ -212,6 +231,7 @@ class ManagerBook extends React.Component {
               </Select>
             </div>
             <Table
+              className="table-books"
               bordered={true}
               rowSelection={rowSelection}
               columns={columns}

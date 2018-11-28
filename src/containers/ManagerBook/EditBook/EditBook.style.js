@@ -6,7 +6,12 @@ const EditBookWapper = styled.div`
   .ant-breadcrumb a {
     font-size: 18px;
     color: black;
-    font-weight: bold;
+    font-weight: 600;
+  }
+  .ant-breadcrumb span {
+    font-size: 18px;
+    color: black;
+    font-weight: 600;
   }
   h3 {
     margin-top: 30px;
@@ -22,11 +27,11 @@ const EditBookWapper = styled.div`
     padding-left: 100px;
     margin-left: 60px;
   }
-   .btn-submit {
+  .btn-submit {
     float: left;
-    margin-top:170px;
-    margin-left:170px;
-    width:100px;
+    margin-top: 170px;
+    margin-left: 170px;
+    width: 100px;
     font-size: 16px;
   }
   .ant-form-item-label.ant-col-xs-24.ant-col-sm-18 label {
@@ -40,9 +45,9 @@ const EditBookWapper = styled.div`
     float: left;
     font-size: 16px;
   }
-  .ant-spin-container{
-    width:96%;
-    padding-left:56px;
+  .ant-spin-container {
+    width: 96%;
+    padding-left: 56px;
   }
   .addchapter {
     margin-top: 20px;
@@ -83,14 +88,13 @@ const EditBookWapper = styled.div`
     margin-top: 20px;
   }
 
-
   .allbook h4 {
     margin-top: 25px;
   }
 
   .delete {
     margin-left: 30px;
-    margin-bottom:20px;
+    margin-bottom: 20px;
     font-family: Arial;
   }
   .delete h4 {
@@ -105,20 +109,7 @@ const EditBookWapper = styled.div`
   #components-table-demo-drag-sorting tr.drop-over-upward td {
     border-top: 2px dashed #1890ff;
   } */
-  .editable-cell {
-    position: relative;
-  }
 
-  .editable-cell-value-wrap {
-    padding: 5px 12px;
-    cursor: pointer;
-  }
-
-  .editable-row:hover .editable-cell-value-wrap {
-    border: 1px solid #d9d9d9;
-    border-radius: 4px;
-    padding: 4px 11px;
-  }
   .allbook {
     width: 95%;
     height: 600px;
@@ -131,7 +122,7 @@ const EditBookWapper = styled.div`
     color: #fda103;
   }
   .allbook h4 {
-    margin-top:31px;
+    margin-top: 31px;
     font-weight: bold;
   }
   .allbook p {
@@ -141,7 +132,7 @@ const EditBookWapper = styled.div`
     padding-left: 18px;
     height: 78%;
     border: 1px solid #ddd;
-    border-bottom:none;
+    border-bottom: none;
   }
   .manager_normalization {
     padding-left: 18px;
@@ -155,9 +146,9 @@ const EditBookWapper = styled.div`
     margin-left: 250px;
     width: 75%;
   }
-   .manager_synthesis_right button{
-     margin-bottom:15px;
-   }
+  .manager_synthesis_right button {
+    margin-bottom: 15px;
+  }
   .manager_normalization_left {
     float: left;
   }

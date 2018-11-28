@@ -8,7 +8,7 @@ const UsersRolesWrapper = styled.div`
     color: #000;
     font-weight: 500;
   }
-  .user_wrapper a {
+  .user_wrapper p {
     float: left;
     margin-top: 50px;
     font-size: 20px;
@@ -24,7 +24,8 @@ const UsersRolesWrapper = styled.div`
   }
   .table_user {
     width: 95%;
-    margin-bottom: 20px;
+
+
   }
   .form_user_infomation {
     width: 50%;
@@ -32,11 +33,12 @@ const UsersRolesWrapper = styled.div`
 
   h6 {
     font-size: 17px;
-    color: rgba(0, 0, 0, 0.65);
-    font-weight: normal;
+    /* color: rgba(0, 0, 0, 0.65); */
+    font-weight: 430;
   }
   h5 {
     font-size: 18px;
+
   }
   li {
     font-size: 16px;

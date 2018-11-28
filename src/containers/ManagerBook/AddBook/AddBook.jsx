@@ -12,25 +12,53 @@ const openNotification = () => {
     description: 'Bạn chỉ được upload  tối đa 10 file trong 1 folder',
   });
 };
-
-const props = {
-  name: 'file',
-  multiple: true,
-  action: '//jsonplaceholder.typicode.com/posts/',
-  onChange(info) {
-    const status = info.file.status;
-    if (status !== 'uploading') {
-      console.log(info.file, info.fileList);
-    }
-    if (status === 'done') {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === 'error') {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-};
 class AddBook extends React.Component {
   render() {
+    const props = {
+      name: 'file',
+      multiple: true,
+      accept: '.XLSX',
+      disabled: false,
+      showUploadList: false,
+      withCredentials: true,
+      action: 'http://localhost:8080/api/v1/books/upload-info',
+      onChange: info => {
+        const { status } = info.file;
+        if (status === 'done') {
+          const { response } = info.file;
+          if (response.status === 1) {
+            message.success(`File ${info.file.name} upload thành công !`);
+          } else {
+            message.warning('Upload không đúng định dạng file!!');
+          }
+        } else if (status === 'error') {
+          message.error(`File ${info.file.name}  upload thất bại !!`);
+        }
+      },
+    };
+    const propsUp = {
+      name: 'file',
+      multiple: true,
+      accept: '.XLSX',
+      disabled: false,
+      showUploadList: false,
+      withCredentials: true,
+      action:
+        'http://localhost:8080/api/v1/books//upload-multiple-book-content',
+      onChange: info => {
+        const { status } = info.file;
+        if (status === 'done') {
+          const { response } = info.file;
+          if (response.status === 1) {
+            message.success(`File ${info.file.name} upload thành công !`);
+          } else {
+            message.warning('Upload không đúng định dạng file!!');
+          }
+        } else if (status === 'error') {
+          message.error(`File ${info.file.name}  upload thất bại !!`);
+        }
+      },
+    };
     return (
       <AddbookStyle>
         <Breadcrumb>
@@ -69,7 +97,7 @@ class AddBook extends React.Component {
             Thêm nội dung sách
             <p>(chỉ áp dụng với những sách được thêm thông tin)</p>
           </h4>
-          <Upload action="//jsonplaceholder.typicode.com/posts/" directory>
+          <Upload {...propsUp} directory>
             <Button type="primary" onClick={openNotification}>
               <Icon type="plus-circle" /> Thêm file hoặc folder
             </Button>

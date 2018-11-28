@@ -26,7 +26,7 @@ const LayoutWrapper = styled.div`
 
   .content {
     width: 85%;
-    height:auto;
+    height:100%;
     margin-left: 204px;
     border:1px solid #ddd;
     border-bottom-color:white;
@@ -45,10 +45,15 @@ const HeaderWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  h3{
-     margin-left:20px;
-     margin-top:10px;
-     color:white;
+  .header-wrapper h3 {
+    margin-left: 20px;
+    margin-top: 10px;
+    color: white;
+    float: left;
+  }
+  .info-wrapper {
+   margin-left: 96%;
+   margin-top:10px;
   }
 `;
 const SiderWrapper = styled.div`

@@ -3,6 +3,11 @@ import styled from 'styled-components';
 const ManagerCategoryWrapper = styled.div`
   margin-top: 10px;
   font-size: 2rem;
+  .manager-category {
+    /* height: 100vh; */
+    display: block;
+    overflow: auto;
+  }
   .action {
     margin-bottom: 30px;
   }
@@ -14,9 +19,9 @@ const ManagerCategoryWrapper = styled.div`
     float: left;
     width: 95%;
   }
-  .table-author {
-    margin-bottom: 30%;
-    margin-top: 1%;
+  .table-category {
+    margin-bottom:10%;
+
   }
 `;
 

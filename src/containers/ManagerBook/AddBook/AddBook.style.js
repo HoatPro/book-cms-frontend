@@ -3,11 +3,11 @@ import styled from 'styled-components';
 const AddbookStyle = styled.div`
   margin-top: 10px;
   width: 100%;
-  font-family: Arial;
+
   .ant-breadcrumb a {
     font-size: 18px;
     color: black;
-    font-weight:bold;
+    font-weight:600;
   }
   sc-bwzfXH llpUzL {
     margin-left: 20px;
@@ -15,7 +15,7 @@ const AddbookStyle = styled.div`
   h3 {
     margin-top: 30px;
     font-size:16px;
-    font-weight:bold;
+    font-weight:500;
   }
 
   h4 {
@@ -37,7 +37,7 @@ const AddbookStyle = styled.div`
     margin-top: 54px;
     margin-left: 420px;
     font-size: 14px;
-    font-weight: normal;
+    font-weight: 500;
   }
   .box1 i {
     padding-left: 5px;

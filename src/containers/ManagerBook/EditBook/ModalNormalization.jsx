@@ -1,19 +1,16 @@
 import React from 'react';
 
-import { Table, Input, Form, Checkbox, Button, Modal } from 'antd';
+import { Table, Input, Form, Checkbox, Button, Modal, message } from 'antd';
 import { NormalizationWrapper } from './Normalization.style';
 import axios from 'axios';
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
-
 const EditableRow = ({ form, index, ...props }) => (
   <EditableContext.Provider value={form}>
     <tr {...props} />
   </EditableContext.Provider>
 );
-
 const EditableFormRow = Form.create()(EditableRow);
-
 class EditableCell extends React.Component {
   state = {
     editing: false,
@@ -122,13 +119,13 @@ class ModalNormalization extends React.Component {
         title: '#',
         dataIndex: 'index',
         key: 'index',
-        width: '5%',
+        width: '10%',
       },
       {
         title: 'Cụm từ',
         dataIndex: 'key',
         key: 'key',
-        width: '45%',
+        width: '40%',
       },
       {
         title: 'Cách đọc',
@@ -195,6 +192,14 @@ class ModalNormalization extends React.Component {
   //Bang Expand
   onExpand = record => {
     const dataExpand = record.expandations;
+
+    const dataConvert = dataExpand.map((data, index) => {
+      return {
+        index: index,
+        ...data,
+      };
+    });
+    //Lưu thông tin 1 bảng thông tin chuẩn hóa
     this.handleSaveData = row => {
       const { data } = this.state;
       if (row) {
@@ -203,8 +208,8 @@ class ModalNormalization extends React.Component {
             if (item.key !== record.key) return item;
             return {
               ...item,
-              expandations: item.expandations.map(ex => {
-                if (ex.start !== row.start) return ex;
+              expandations: item.expandations.map((ex, index) => {
+                if (index !== row.index) return ex;
                 return {
                   ...ex,
                   expandation: row.expandation,
@@ -233,7 +238,7 @@ class ModalNormalization extends React.Component {
         title: 'Cách đọc',
         dataIndex: 'expandation',
         key: 'expandation',
-        width: '49.35%',
+        width: '50.28%',
         editable: true,
       },
     ];
@@ -262,15 +267,16 @@ class ModalNormalization extends React.Component {
 
     return (
       <Table
-        scroll={{ y: 200 }}
+        // scroll={{ y: 200 }}
         components={componentsExpand}
         columns={columnsExpand}
-        dataSource={dataExpand}
+        dataSource={dataConvert}
         pagination={false}
-        rowKey={record => record.start}
+        rowKey={record => record.index}
       />
     );
   };
+  //Lưu thông tin tất cả bảng chuẩn hóa
   handleSaveAll = () => {
     const { visible } = this.props;
     const dataEdit = this.state.data;
@@ -291,7 +297,8 @@ class ModalNormalization extends React.Component {
       }),
     }).then(res => {
       if (res.status) {
-        message.info('Chuẩn hóa..');
+        message.success('Lưu thay đổi thành công !');
+        window.location.reload();
       }
     });
     this.props.closeModal(!visible);

@@ -11,12 +11,14 @@ const ManagerBookWrapper = styled.div`
     padding-left: 10px;
   }
   .ant-input-search.ant-input-affix-wrapper {
-    width:50%;
+    width: 50%;
   }
   .ant-pagination.ant-table-pagination {
     margin-right: 20px;
   }
-
+  .table-books{
+    width:98%;
+  }
 `;
 
 export   { ManagerBookWrapper };

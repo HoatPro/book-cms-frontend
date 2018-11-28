@@ -3,7 +3,7 @@ const autoprefixer = require('autoprefixer');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const port = 8080;
+const port = 8000;
 
 module.exports = {
   entry: [

@@ -45,10 +45,12 @@ class Siders extends React.Component {
             </Link>
           </Menu.Item>
           <Menu.Item>
-            <span>
-              <Icon type="bar-chart" />
-              <span>Thống kê</span>
-            </span>
+            <Link to="/statistical" onClick={this.handleClick}>
+              <span>
+                <Icon type="bar-chart" />
+                <span>Thống kê</span>
+              </span>
+            </Link>
           </Menu.Item>
           <Menu.Item>
             <Link to="/user-role" onClick={this.handleClick}>

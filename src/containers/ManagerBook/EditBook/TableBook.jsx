@@ -5,143 +5,24 @@ import {
   Dropdown,
   Menu,
   Button,
-  Icon,
   Modal,
   Input,
   Select,
   message,
 } from 'antd';
-import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
-import update from 'immutability-helper';
+
 import { EditBookWapper } from './EditBook.style';
 import ModalNormalization from './ModalNormalization';
 import axios from 'axios';
-import { consolidateStreamedStyles } from 'styled-components';
 const { TextArea } = Input;
 const Option = Select.Option;
 const FormItem = Form.Item;
-// import ModalEdit from './ModalEdit';
-
-function dragDirection(
-  dragIndex,
-  hoverIndex,
-  initialClientOffset,
-  clientOffset,
-  sourceClientOffset,
-) {
-  const hoverMiddleY = (initialClientOffset.y - sourceClientOffset.y) / 2;
-  const hoverClientY = clientOffset.y - sourceClientOffset.y;
-  if (dragIndex < hoverIndex && hoverClientY > hoverMiddleY) {
-    return 'downward';
-  }
-  if (dragIndex > hoverIndex && hoverClientY < hoverMiddleY) {
-    return 'upward';
-  }
-}
-
-class BodyRow extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      title: '',
-      content: '',
-      visibleNormalization: false,
-    };
-  }
-
-  render() {
-    const {
-      isOver,
-      connectDragSource,
-      connectDropTarget,
-      moveRow,
-      dragRow,
-      clientOffset,
-      sourceClientOffset,
-      initialClientOffset,
-      ...restProps
-    } = this.props;
-
-    const style = { ...restProps.style, cursor: 'move' };
-
-    let className = restProps.className;
-    if (isOver && initialClientOffset) {
-      const direction = dragDirection(
-        dragRow.index,
-        restProps.index,
-        initialClientOffset,
-        clientOffset,
-        sourceClientOffset,
-      );
-      if (direction === 'downward') {
-        className += ' drop-over-downward';
-      }
-      if (direction === 'upward') {
-        className += ' drop-over-upward';
-      }
-    }
-
-    return connectDragSource(
-      connectDropTarget(
-        <tr {...restProps} className={className} style={style} />,
-      ),
-    );
-  }
-}
-
-const rowSource = {
-  beginDrag(props) {
-    return {
-      index: props.index,
-    };
-  },
-};
-
-const rowTarget = {
-  drop(props, monitor) {
-    const dragIndex = monitor.getItem().index;
-    const hoverIndex = props.index;
-
-    // Don't replace items with themselves
-    if (dragIndex === hoverIndex) {
-      return;
-    }
-
-    // Time to actually perform the action
-    props.moveRow(dragIndex, hoverIndex);
-
-    // Note: we're mutating the monitor item here!
-    // Generally it's better to avoid mutations,
-    // but it's good here for the sake of performance
-    // to avoid expensive index searches.
-    monitor.getItem().index = hoverIndex;
-  },
-};
-const DragableBodyRow = DropTarget('row', rowTarget, (connect, monitor) => ({
-  connectDropTarget: connect.dropTarget(),
-  isOver: monitor.isOver(),
-  sourceClientOffset: monitor.getSourceClientOffset(),
-}))(
-  DragSource('row', rowSource, (connect, monitor) => ({
-    connectDragSource: connect.dragSource(),
-    dragRow: monitor.getItem(),
-    clientOffset: monitor.getClientOffset(),
-    initialClientOffset: monitor.getInitialClientOffset(),
-  }))(BodyRow),
-);
-const dataz = [];
+//lấy chỉ số select bảng
+const dataSelected = [];
 const rowSelection = {
   onChange: selectedRows => {
-    return dataz.push(selectedRows);
+    return dataSelected.push(selectedRows);
   },
-  getCheckboxProps: record => ({
-    disabled: record.name === 'Disabled User', // Column configuration not to be checked
-    name: record.name,
-  }),
-  // onSelectAll: selectedRows => {
-  //   dataz.push(selectedRows.key);
-  // },
 };
 
 class TableBook extends React.Component {
@@ -151,18 +32,82 @@ class TableBook extends React.Component {
       title: '',
       content: '',
       visibleAddChapter: false,
-      editVisible: false, // visible modal Edit
-      data: [],
+      editVisible: false,
+      dataTable: [],
       objChapters: {},
+      chapters: [],
       keyModal: null,
-      selectedRow: dataz,
       loading: false,
-    };
+    }; // visible modal Edit
   }
+  componentDidMount() {
+    const { bookId } = this.props;
+    axios({
+      method: 'GET',
+      url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
+      withCredentials: true,
+    }).then(response => {
+      if (response.status) {
+        const chapters = response.data.results;
+        const dataTable = chapters.map(chapter => {
+          return {
+            key: `${chapter.id}`,
+            title: `${chapter.title}`,
+            content: `${chapter.content}`,
+            orderNo: chapter.orderNo,
+          };
+        });
+
+        this.setState({ dataTable: dataTable, chapters: chapters }, function() {
+          this.convertChapters();
+        });
+      }
+    });
+  }
+
+  convertChapters = () => {
+    const { chapters } = this.state;
+    const objChapters = {};
+    chapters.forEach(chapter => {
+      objChapters[chapter.id] = chapter;
+    });
+    this.setState({ objChapters });
+  };
+  //Xóa 1 phần tử
+  handleDelete = key => {
+    //key chính là chapterID
+    const { bookId } = this.props;
+    axios({
+      method: 'DELETE',
+      url: `http://localhost:8080/api/v1/books/${bookId}/chapters/${key}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    }).then(res => {
+      if (res.status) {
+        const dataTable = [...this.state.dataTable];
+        this.setState({
+          dataTable: dataTable.filter(item => item.key !== key),
+        });
+        message.success('Xóa chương thành công!');
+      }
+    });
+  };
+  // Xóa lựa chọn nhiều
   handleDeleteTable = () => {
     const { bookId } = this.props;
-    const selectedRows = this.state.selectedRow;
-    const lastIndex = selectedRows.length - 1;
+    const lastIndex = dataSelected.length - 1;
+    const arrayNumberSelected = dataSelected[lastIndex];
+    // const { dataTable } = this.state;
+    // const listId = [];
+    // for (let i in arrayNumberSelected) {
+    //   for (let j in dataTable) {
+    //     if (dataTable[j].orderNo === arrayNumberSelected[i]) {
+    //       listId.push(dataTable[j].key);
+    //     }
+    //   }
+    // }
     axios({
       method: 'DELETE',
       url: `http://localhost:8080/api/v1/books/${bookId}/chapters/`,
@@ -170,94 +115,7 @@ class TableBook extends React.Component {
         'Content-Type': 'application/json',
       },
       withCredentials: true,
-      data: selectedRows[lastIndex],
-    }).then(res => {
-      message.success('Xóa chương thành công!');
-      window.location.reload();
-    });
-  };
-  components = {
-    body: {
-      row: DragableBodyRow,
-    },
-  };
-
-  // rowSelection object indicates the need for row selection
-
-  moveRow = (dragIndex, hoverIndex) => {
-    const { data } = this.state;
-    const dragRow = data[dragIndex];
-
-    this.setState(
-      update(this.state, {
-        data: {
-          $splice: [[dragIndex, 1], [hoverIndex, 0, dragRow]],
-        },
-      }),
-    );
-  };
-  componentWillReceiveProps(nextProps) {
-    const { chapters, objChapters } = nextProps;
-    const data = chapters.map(chapter => {
-      return {
-        key: `${chapter.id}`,
-        title: `${chapter.title}`,
-        content: `${chapter.content}`,
-      };
-    });
-    this.setState({ data, objChapters });
-  }
-
-  getColumns = () => {
-    const columns = [
-      { title: 'Chương', dataIndex: 'title', key: 'title', width: '80%' },
-      {
-        title: 'Lựa chọn',
-        key: 'choice',
-        width: '20%',
-        render: record => {
-          const menu = (
-            <Menu>
-              <Menu.Item>
-                <a>Tổng hợp</a>
-              </Menu.Item>
-              <Menu.Item>
-                <a>Chuẩn hóa</a>
-              </Menu.Item>
-              <Menu.Item onClick={() => this.handleDelete(record.key)}>
-                <a>Xóa</a>
-              </Menu.Item>
-              <Menu.Item
-                onClick={() => this.setNormalizationVisible(record.key)}
-              >
-                <a>Kiểm tra</a>
-              </Menu.Item>
-            </Menu>
-          );
-          return (
-            <Dropdown.Button
-              style={{ color: '#505659' }}
-              onClick={() => this.setEditVisible(record.key)}
-              overlay={menu}
-            >
-              Chỉnh sửa
-            </Dropdown.Button>
-          );
-        },
-      },
-    ];
-    return columns;
-  };
-  handleDelete = key => {
-    const { bookId, objChapters } = this.props;
-    const chapterId = objChapters[key].id;
-    axios({
-      method: 'DELETE',
-      url: `http://localhost:8080/api/v1/books/${bookId}/chapters/${chapterId}`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      withCredentials: true,
+      data: arrayNumberSelected,
     }).then(res => {
       if (res.status) {
         message.success('Xóa chương thành công!');
@@ -265,122 +123,165 @@ class TableBook extends React.Component {
       }
     });
   };
-  //Thêm chương
   // Thêm chương trong Detail Book
+
+  handleCancel = () => {
+    this.setState({
+      editVisible: false,
+      loading: false,
+      visibleAddChapter: false,
+    });
+  };
+
   handleAddChapter = visibleAddChapter => {
+    this.props.form.setFieldsValue({
+      modalTitleAdd: '',
+      modalContentAdd: '',
+    });
     this.setState({
       visibleAddChapter,
     });
   };
-  handleCancel = e => {
-    this.setState({
-      visibleAddChapter: false,
-    });
-  };
   handleSaveAddChapter = () => {
-    const { chapters, bookId } = this.props;
-    if (chapters.length > 0) {
-      const lastIndex = chapters.length - 1;
-      const chapterOrderNo = chapters[lastIndex].orderNo;
-
+    const { bookId } = this.props;
+    const { dataTable } = this.state;
+    if (dataTable.length > 0) {
+      const lastIndex = dataTable.length - 1;
+      const chapterOrderNo = dataTable[lastIndex].orderNo;
+      this.setState({ loading: true });
       this.props.form.validateFields((err, fieldsValue) => {
-        axios({
-          method: 'POST',
-          url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-          data: {
-            title: fieldsValue['modalTitleAdd'],
-            content: fieldsValue['modalContentAdd'],
-            orderNo: chapterOrderNo + 1,
-          },
-        }).then(res => {
-          if (res.data.status === 0) {
-            message.error('Thêm chương có orderNo đã tồn tại!!');
-          } else {
-            message.success('Thêm chương thành công !');
-            window.location.reload();
-          }
-        });
-      });
-      this.setState({
-        visibleAddChapter: false,
+        if (!err) {
+          axios({
+            method: 'POST',
+            url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+            data: {
+              title: fieldsValue['modalTitleAdd'],
+              content: fieldsValue['modalContentAdd'],
+              orderNo: chapterOrderNo + 1,
+            },
+          }).then(res => {
+            if (res.data.status === 0) {
+              message.error('Thêm chương có orderNo đã tồn tại!!');
+            } else {
+              this.setState({
+                visibleAddChapter: false,
+                loading: false,
+              });
+              message.success('Thêm chương thành công !');
+              window.location.reload();
+            }
+          });
+        }
       });
     } else {
+      this.setState({ loading: true });
       this.props.form.validateFields((err, fieldsValue) => {
-        axios({
-          method: 'POST',
-          url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-          data: {
-            title: fieldsValue['modalTitleAdd'],
-            content: fieldsValue['modalContentAdd'],
-            orderNo: 1,
-          },
-        }).then(res => {
-          if (res.data.status === 0) {
-            message.error('Thêm chương có orderNo đã tồn tại!!');
-          } else {
-            message.success('Thêm chương thành công !');
-            window.location.reload();
-          }
-        });
-      });
-      this.setState({
-        visibleAddChapter: false,
+        if (!err) {
+          axios({
+            method: 'POST',
+            url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+            data: {
+              title: fieldsValue['modalTitleAdd'],
+              content: fieldsValue['modalContentAdd'],
+              orderNo: 1,
+            },
+          }).then(res => {
+            if (res.data.status === 0) {
+              message.error('Thêm chương có orderNo đã tồn tại!!');
+            } else {
+              this.setState({
+                visibleAddChapter: false,
+                loading: false,
+              });
+              message.success('Thêm chương thành công !');
+              window.location.reload();
+            }
+          });
+        }
       });
     }
   };
   // Hiện modal Edit
-  setEditVisible = key => {
-    const { objChapters } = this.props;
+
+  // handleSynthensis = () => {
+  //   console.log('Quản lý tổng hợp');
+  // };
+  handleEdit = key => {
+    const { objChapters } = this.state;
     this.props.form.setFieldsValue({
       modalTitleEdit: objChapters[key].title,
       modalContentEdit: objChapters[key].content,
     });
-    this.setState({ editVisible: true, keyModal: key });
+    this.setState({ editVisible: true, keyModal: key, loading: true });
   };
-  handleCancel = () => {
-    this.setState({ editVisible: false });
-  };
-
-  handleSave = e => {
-    e.preventDefault();
-    const { keyModal } = this.state;
-    const { bookId, objChapters } = this.props;
+  handleSave = () => {
+    const { keyModal, objChapters } = this.state;
+    const { bookId } = this.props;
     const chapterId = objChapters[keyModal].id;
-    this.props.form.validateFieldsAndScroll((err, fieldsValue) => {
-      axios({
-        method: 'PUT',
-        url: `http://localhost:8080/api/v1/books/${bookId}/chapters/${chapterId}`,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true,
-        data: {
-          title: fieldsValue['modalTitleEdit'],
-          content: fieldsValue['modalContentEdit'],
-        },
-      }).then(res => {
-        if (res.status) {
-          this.setState({
-            editVisible: false,
-          });
-          message.success('Sửa chương thành công !!');
-          window.location.reload();
-        }
-      });
+    this.props.form.validateFields((err, fieldsValue) => {
+      if (!err) {
+        axios({
+          method: 'PUT',
+          url: `http://localhost:8080/api/v1/books/${bookId}/chapters/${chapterId}`,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+          data: {
+            title: fieldsValue['modalTitleEdit'],
+            content: fieldsValue['modalContentEdit'],
+          },
+        }).then(res => {
+          if (res.status) {
+            const { dataTable } = this.state;
+            message.success('Sửa chương thành công !!');
+            setTimeout(() => {
+              this.setState(
+                {
+                  editVisible: false,
+                  dataTable: dataTable.map(item => {
+                    if (item.key !== keyModal) return item;
+                    return {
+                      ...item,
+                      title: fieldsValue['modalTitleEdit'],
+                      content: fieldsValue['modalContentEdit'],
+                    };
+                  }),
+                  loading: false,
+                },
+                function() {
+                  this.updateObjChapters();
+                },
+              );
+            }, 200);
+          }
+        });
+      }
     });
   };
 
-  //Modal Chuẩn hóa
+  updateObjChapters = () => {
+    const { dataTable } = this.state;
+    const objChapters = {};
+    dataTable.map(data => {
+      objChapters[data.key] = data;
+    });
+    this.setState({
+      objChapters: objChapters,
+    });
+  };
+
+  // Modal Chuẩn hóa
   setNormalizationVisible = key => {
-    const { objChapters } = this.props;
+    const { objChapters } = this.state;
     this.setState({
       dataChapterNormalization: objChapters[key].normalizationValue,
       dataNormalization: objChapters[key],
@@ -392,10 +293,49 @@ class TableBook extends React.Component {
       visibleNormalization: visible,
     });
   };
-
   render() {
-    const { chapters, getFieldDecorator, form } = this.props;
-
+    const columns = [
+      { title: 'Chương', dataIndex: 'title', key: 'title', width: '80%' },
+      {
+        title: 'Lựa chọn',
+        key: 'choice',
+        width: '20%',
+        render: record => {
+          if (this.state.dataTable.length >= 1) {
+            const menu = (
+              <Menu>
+                <Menu.Item>
+                  <a>Tổng hợp</a>
+                </Menu.Item>
+                <Menu.Item>
+                  <a>Chuẩn hóa</a>
+                </Menu.Item>
+                <Menu.Item onClick={() => this.handleDelete(record.key)}>
+                  <a>Xóa</a>
+                </Menu.Item>
+                <Menu.Item
+                  onClick={() => this.setNormalizationVisible(record.key)}
+                >
+                  <a>Kiểm tra</a>
+                </Menu.Item>
+              </Menu>
+            );
+            return (
+              <Dropdown.Button
+                style={{ color: '#505659' }}
+                onClick={() => this.handleEdit(record.key)}
+                overlay={menu}
+              >
+                Chỉnh sửa
+              </Dropdown.Button>
+            );
+          } else {
+            return;
+          }
+        },
+      },
+    ];
+    const { getFieldDecorator } = this.props.form;
     return (
       <EditBookWapper>
         {/* Bảng thông tin chapter và lựa chọn hành động cho bảng */}
@@ -417,15 +357,16 @@ class TableBook extends React.Component {
             Xóa
           </Option>
         </Select>
-        <Table
-          bordered
-          columns={this.getColumns()}
-          rowSelection={rowSelection}
-          dataSource={this.state.data}
-          loading={this.state.loading}
-          // components={this.components}
-          // onRow={(record, index) => ({ index, moveRow: this.moveRow })}
-        />
+        <div className="table-chapter">
+          <Table
+            bordered
+            columns={columns}
+            rowSelection={rowSelection}
+            dataSource={this.state.dataTable}
+            loading={this.state.loading}
+            rowKey={record => record.key}
+          />
+        </div>
         {/* Modal Add  chương */}
         <div className="modal-add-chapter">
           <Modal
@@ -457,14 +398,14 @@ class TableBook extends React.Component {
         {/* Modal Edit chương */}
         <Modal
           visible={this.state.editVisible}
-          onCancel={this.handleCancel}
           title="Sửa chương"
+          onOk={this.handleSave}
           okText="Lưu"
+          onCancel={this.handleCancel}
           cancelText="Hủy"
           width={900}
-          footer={null}
         >
-          <Form layout="vertical" onSubmit={this.handleSave}>
+          <Form layout="vertical">
             <FormItem label="Tiêu đề">
               {getFieldDecorator('modalTitleEdit', {
                 rules: [
@@ -477,13 +418,6 @@ class TableBook extends React.Component {
             </FormItem>
             <FormItem label="Nội dung">
               {getFieldDecorator('modalContentEdit')(<TextArea rows={16} />)}
-            </FormItem>
-            <FormItem>
-              <Button onClick={this.handleCancel}>Hủy</Button>
-              &nbsp;
-              <Button type="primary" htmlType="submit">
-                Lưu
-              </Button>
             </FormItem>
           </Form>
         </Modal>
@@ -501,6 +435,6 @@ class TableBook extends React.Component {
   }
 }
 
-const App = DragDropContext(HTML5Backend)(TableBook);
+const TableChapter = Form.create()(TableBook);
 
-export default App;
+export default TableChapter;

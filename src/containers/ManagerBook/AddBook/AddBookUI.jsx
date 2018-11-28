@@ -28,49 +28,31 @@ const FormItem = Form.Item;
 const Option = Select.Option;
 const { MonthPicker } = DatePicker;
 // rowSelection chọn phần tử trong bảng
-const dataz = [];
+const dataSelected = [];
 const rowSelection = {
   onChange: selectedRows => {
-    return dataz.push(selectedRows);
+    return dataSelected.push(selectedRows);
   },
 };
-
-//Tên tác giả
-const authorsTag = [];
-authorsTag.push(
-  <Option key="5b97800a911f176704c41f6b">sharon l.lechter</Option>,
-  <Option key="5b97800a911f176704c41f6d">robert t. kiyosaki</Option>,
-  <Option key="5b97800a911f176704c41f6f">michael ellsberg</Option>,
-  <Option key="5b97800a911f176704c41f71">jeffrey pfeffer</Option>,
-  <Option key="5b97800a911f176704c41f74">geoffrey g. parker</Option>,
-  <Option key="5bcd8309d91f1a2628f15e22">Nguyễn Nhật Ánh</Option>,
-  <Option key="5bcd837fd91f1a2628f15e25">Nguyễn Ngọc Thạch</Option>,
-  <Option key="5bcd8421d91f1a2628f15e26">Thần Đồng</Option>,
-  <Option key="5bcd8464d91f1a2628f15e27">Trương Kiêt</Option>,
-);
-// Creat Form Modal
 class AddBookUI extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       autoCompleteResult: [],
-      selectedRowKeys: [],
       loading: false,
-      authorsTag: [],
       disableButton: true, // disable button 'Thêm sách'
       disaleButtonAdd: false, // disable button 'Thêm chương' nếu chọn Upload
       showTable1: true, // bảng thêm chapter bằng tay
-      modalTitle: '',
-      modalContent: '',
       addVisible: false, // visible modal Add
       editVisible: false, // visible modal Edit
       chapters: [], // lưu trữ chapter của bảng
-      count: 0,
-      fileName: '',
+      // fileName: '',
       keyModal: null,
-      selectedRow: dataz,
+      dataCategory: [],
+      dataAuthor: [],
     };
   }
+
   getColumns = () => {
     const columns = [
       {
@@ -123,14 +105,36 @@ class AddBookUI extends React.Component {
     ];
     return columns;
   };
+  async componentDidMount() {
+    //API dữ liệu thể loại
+    axios({
+      method: 'GET',
+      url: `http://localhost:8080/api/v1/categories?fileds=name`,
+      withCredentials: true,
+    }).then(res => {
+      const dataCategory = res.data.results.items;
+      this.setState({
+        dataCategory: dataCategory,
+      });
+    });
+
+    //API dữ liệu tác giả
+    axios({
+      method: 'GET',
+      url: `http://localhost:8080/api/v1/authors?fileds=name`,
+      withCredentials: true,
+    }).then(res => {
+      const dataAuthor = res.data.results.items;
+      this.setState({ dataAuthor: dataAuthor });
+    });
+  }
   // Submit form
   handleSubmit = e => {
     e.preventDefault();
-    let { chapters, fileName } = this.state;
-
+    let { chapters } = this.state;
     this.props.form.validateFields((err, fieldsValue) => {
       if (err) {
-        return;
+        console.log(err);
       }
       //API POST BOOK BY UI
       chapters = chapters.map(chapter => {
@@ -156,32 +160,32 @@ class AddBookUI extends React.Component {
             publishingCompany: fieldsValue['publishingCompany'],
             translator: fieldsValue['translator'],
             pageNumber: fieldsValue['pageNumber'],
-            fileName: fileName,
+            // fileName: fileName,
             chapters: chapters,
           },
         }).then(res => {
           if (res.status === 200 && res.data.status) {
-            window.location.reload();
+            let path = '/manager-book';
+            this.props.history.push(path);
           } else {
             alert('Upload sách lỗi');
           }
         });
-
-        let path = '/manager-book';
-        this.props.history.push(path);
       } else {
         const categories = fieldsValue['categories'].map(category => {
+          const start = category.lastIndexOf('-') + 1;
+          const str = category.slice(start);
           return {
-            id: category,
+            id: str,
           };
         });
-
-        fieldsValue['authors'] = fieldsValue['authors'].map(author => {
+        const authors = fieldsValue['authors'].map(author => {
+          const start = author.lastIndexOf('-') + 1;
+          const str = author.slice(start);
           return {
-            id: author,
+            id: str,
           };
         });
-
         axios({
           method: 'POST',
           url: 'http://localhost:8080/api/v1/books/',
@@ -194,22 +198,20 @@ class AddBookUI extends React.Component {
             publishingCompany: fieldsValue['publishingCompany'],
             translator: fieldsValue['translator'],
             categories: categories,
-            authors: fieldsValue['authors'],
+            authors: authors,
             publicYear: fieldsValue['month_picker'].format('YYYY'),
             pageNumber: fieldsValue['pageNumber'],
-            fileName: fileName,
+            // fileName: fileName,
             chapters: chapters,
           },
         }).then(res => {
           if (res.status === 200 && res.data.status) {
-            window.location.reload();
+            let path = '/manager-book';
+            this.props.history.push(path);
           } else {
             alert('Upload sách lỗi');
           }
         });
-
-        let path = '/manager-book';
-        this.props.history.push(path);
       }
     });
   };
@@ -220,29 +222,35 @@ class AddBookUI extends React.Component {
       showTable1: true,
     });
   };
-  setAddVisible(addVisible) {
-    this.setState({
-      addVisible,
-      showTable1: true,
-    });
-  }
 
-  setEditVisible(editVisible) {
-    this.setState({ editVisible });
-  }
   handleCancel = () => {
     this.setState({ addVisible: false, editVisible: false });
   };
   //Thêm chương bằng UI
-  handleAdd = () => {
+
+  handleAdd = addVisible => {
+    this.props.form.setFieldsValue({
+      modalTitleAdd: '',
+      modalContentAdd: '',
+    });
+    this.setState({
+      addVisible,
+      showTable1: true,
+    });
+  };
+  handleSaveAdd = () => {
     const { chapters } = this.state;
-    this.props.form.validateFields((err, values) => {
-      if (!err) this.props.form.resetFields();
+
+    this.props.form.validateFields((err, fieldsValue) => {
+      if (err) {
+        console.log(err);
+      }
+
       //kiểm tra
       if (chapters.length < 1) {
         const newData = {
-          title: values.modalTitleAdd,
-          content: values.modalContentAdd,
+          title: fieldsValue['modalTitleAdd'],
+          content: fieldsValue['modalContentAdd'],
           orderNo: 1,
         };
         this.setState({
@@ -254,8 +262,8 @@ class AddBookUI extends React.Component {
       } else {
         const lastIndexChapters = chapters.length - 1;
         const newData = {
-          title: values.modalTitleAdd,
-          content: values.modalContentAdd,
+          title: fieldsValue['modalTitleAdd'],
+          content: fieldsValue['modalContentAdd'],
           orderNo: chapters[lastIndexChapters].orderNo + 1,
         };
         this.setState({
@@ -269,10 +277,12 @@ class AddBookUI extends React.Component {
   };
 
   //Sửa chương
+  setEditVisible(editVisible) {
+    this.setState({ editVisible });
+  }
   handleEdit = orderNo => {
     const chapters = [...this.state.chapters];
     const chapter = chapters.filter(item => item.orderNo === orderNo);
-
     this.props.form.setFieldsValue({
       modalTitleEdit: chapter[0].title,
       modalContentEdit: chapter[0].content,
@@ -280,8 +290,7 @@ class AddBookUI extends React.Component {
 
     this.setState({ editVisible: true, keyModal: orderNo });
   };
-  handleSave = e => {
-    e.preventDefault();
+  handleSave = () => {
     const { keyModal, chapters } = this.state;
     this.props.form.validateFields((err, fieldsValue) => {
       let values = [
@@ -299,6 +308,7 @@ class AddBookUI extends React.Component {
         }),
         editVisible: false,
       });
+      message.success('Sửa chương thành công !!');
     });
   };
   //Xóa chương
@@ -308,21 +318,31 @@ class AddBookUI extends React.Component {
       chapters: chapters.filter(item => item.orderNo !== orderNo),
     });
   };
-  //Xóa chương theo hành động
+  //Lựa chọn xóa nhiều chương
   handleDeleteAll = () => {
-    const selectedRows = this.state.selectedRow;
-    const lastIndex = selectedRows.length - 1;
+    const lastIndex = dataSelected.length - 1;
+    const obj = dataSelected[lastIndex];
+    console.log(obj);
     const { chapters } = this.state;
-
-    if (selectedRows[lastIndex])
-      this.setState({
-        chapters: chapters.filter(
-          item => item.title !== selectedRows[lastIndex],
-        ),
+    let array = [...chapters];
+    const a = [];
+    chapters.map((chapter, index) => {
+      obj.map(ob => {
+        if (ob === chapter.orderNo) {
+          a.push(index);
+        }
       });
+    });
+    console.log(a);
+    a.map(a1 => {
+      array.splice(a1, 1);
+    });
+    console.log(array);
+    // this.setState({
+    //   chapters: array,
+    // });
   };
-
-  //Function click button Upload ,change TableUploadBook ,disable button 'Thêm chương'
+  //Function click button Upload ,change TableUploadBook ,disable button 'Thêm chương' with dataUpload callback is text
   handleClickTable = () => {
     this.setState({
       showTable1: false,
@@ -333,8 +353,7 @@ class AddBookUI extends React.Component {
   //API upload book
 
   render() {
-    const { disableButton, disaleButtonAdd, showTable1, chapters } = this.state;
-
+    const { disableButton, disaleButtonAdd, showTable1 } = this.state;
     const props = {
       name: 'file',
       multiple: true,
@@ -355,7 +374,7 @@ class AddBookUI extends React.Component {
                 chapters: dataUpload.map(chapter => {
                   return { ...chapter, orderNo: chapter.orderNo };
                 }),
-                fileName: info.file.name,
+                // fileName: info.file.name,
                 disableButton: false,
               });
               message.success(`File ${info.file.name} upload thành công !`);
@@ -373,7 +392,7 @@ class AddBookUI extends React.Component {
                     };
                   }),
                 ],
-                fileName: info.file.name,
+                // fileName: info.file.name,
                 disableButton: false,
               });
               message.success(`File ${info.file.name} upload thành công !`);
@@ -405,14 +424,38 @@ class AddBookUI extends React.Component {
         <Table
           rowClassName={() => 'editable-row'}
           bordered
-          dataSource={chapters}
+          dataSource={this.state.chapters}
           columns={this.getColumns()}
           rowSelection={rowSelection}
           rowKey={record => record.orderNo}
         />
       );
     }
-
+    const menu = (
+      <Menu>
+        <Menu.Item>
+          <a onClick={this.handleDeleteAll}>Xóa</a>
+        </Menu.Item>
+      </Menu>
+    );
+    const { dataCategory } = this.state;
+    const selectCategory = [];
+    dataCategory.map(data => {
+      selectCategory.push(
+        <Option key={data.id} value={data.slug}>
+          {data.name}
+        </Option>,
+      );
+    });
+    const { dataAuthor } = this.state;
+    const selectAuthor = [];
+    dataAuthor.map(data => {
+      selectAuthor.push(
+        <Option key={data.id} value={data.slug}>
+          {data.name}
+        </Option>,
+      );
+    });
     return (
       <AddbookUIStyle>
         <Breadcrumb>
@@ -423,21 +466,17 @@ class AddBookUI extends React.Component {
             <Link to="/addbookui">Thêm sách bằng giao diện</Link>
           </Breadcrumb.Item>
         </Breadcrumb>
-        <Form
-          onSubmit={this.handleSubmit}
-          chapters={this.state.chapters}
-          className="info-book"
-        >
+        <Form chapters={this.state.chapters}>
           <div className="form_add_infobook">
             <FormItem {...formItemLayout} label="Tên sách">
               {getFieldDecorator('title', {
                 rules: [
                   {
                     required: true,
-                    message: 'Tên sách không được để trống!',
+                    message: 'Khi thêm sách, tên sách không được để trống!',
                   },
                 ],
-              })(<Input onChange={this.onChangeForm} />)}
+              })(<Input />)}
             </FormItem>
             <FormItem {...formItemLayout} label="Nhà xuất bản">
               {getFieldDecorator('publishingCompany', {
@@ -499,8 +538,8 @@ class AddBookUI extends React.Component {
                   },
                 ],
               })(
-                <Select mode="tags" placeholder="Tên tác giả">
-                  {authorsTag}
+                <Select mode="tags" placeholder="Tên tác giả" allowClear={true}>
+                  {selectAuthor}
                 </Select>,
               )}
             </FormItem>
@@ -536,28 +575,12 @@ class AddBookUI extends React.Component {
                   },
                 ],
               })(
-                <Select mode="multiple" placeholder="Chọn thể loại">
-                  <Option key="5bcd851a62b4fb262853d6c2">Chính trị</Option>
-                  <Option key="5bcd85ccd91f1a2628f15e29">Pháp luật</Option>
-                  <Option key="5bcd860cd91f1a2628f15e2a">
-                    Khoa học công nghệ
-                  </Option>
-                  <Option key="5bcd8639d91f1a2628f15e2b">Kinh tế</Option>
-                  <Option key="5b977f97911f176704c41f5a">Văn hóa xã hội</Option>
-                  <Option key="5b977f97911f176704c41f5f">
-                    khoa học xã hội
-                  </Option>
-                  <Option key="5b977f97911f176704c41f64">Sách quản trị</Option>
-                  <Option key="5bcd864fd91f1a2628f15e2c">Lịch sử</Option>
-                  <Option key="5bcd8672d91f1a2628f15e2d">
-                    Văn học nghệ thuật
-                  </Option>
-                  <Option key="5bcd86b4d91f1a2628f15e2e">Giáo trình</Option>
-                  <Option key="5bcd86dfd91f1a2628f15e2f">Truyện ngắn</Option>
-                  <Option key="5bcd86f5d91f1a2628f15e30">Tiểu thuyết</Option>
-                  <Option key="5bcd8711d91f1a2628f15e31">Tâm lý</Option>
-                  <Option key="5bcd8722d91f1a2628f15e32">Tôn giáo</Option>
-                  <Option key="5bcd873fd91f1a2628f15e33">Sách thiếu nhi</Option>
+                <Select
+                  mode="multiple"
+                  placeholder="Chọn thể loại"
+                  allowClear={true}
+                >
+                  {selectCategory}
                 </Select>,
               )}
             </FormItem>
@@ -567,7 +590,7 @@ class AddBookUI extends React.Component {
             <Button
               type="primary"
               className="add_chapter"
-              onClick={() => this.setAddVisible(true)}
+              onClick={() => this.handleAdd(true)}
               disabled={disaleButtonAdd}
             >
               <Icon type="plus-circle" theme="outlined" />
@@ -576,46 +599,35 @@ class AddBookUI extends React.Component {
             {/* Modal Add book */}
             <Modal
               visible={this.state.addVisible}
-              chapters={chapters}
+              chapters={this.state.chapters}
               onCancel={this.handleCancel}
+              onOk={this.handleSaveAdd}
               title="Thêm chương"
               okText="Thêm"
               cancelText="Hủy"
               width={900}
-              footer={null}
             >
-              <Form
-                layout="vertical"
-                onSubmit={this.handleAdd}
-                className="add-chapter"
-              >
+              <Form layout="vertical">
                 <FormItem label="Tiêu đề">
                   {getFieldDecorator('modalTitleAdd')(<Input />)}
                 </FormItem>
                 <FormItem label="Nội dung">
                   {getFieldDecorator('modalContentAdd')(<TextArea rows={16} />)}
                 </FormItem>
-                <FormItem>
-                  <Button onClick={this.handleCancel}>Hủy</Button>
-                  &nbsp;
-                  <Button type="primary" htmlType="submit">
-                    Lưu
-                  </Button>
-                </FormItem>
               </Form>
             </Modal>
             {/* Modal Edit Book */}
             <Modal
               visible={this.state.editVisible}
-              chapters={chapters}
+              chapters={this.state.chapters}
               onCancel={this.handleCancel}
+              onOk={this.handleSave}
               title="Sửa chương"
               okText="Lưu"
               cancelText="Hủy"
               width={900}
-              footer={null}
             >
-              <Form layout="vertical" className="edit-chapter">
+              <Form layout="vertical">
                 <FormItem label="Tiêu đề">
                   {getFieldDecorator('modalTitleEdit')(<Input />)}
                 </FormItem>
@@ -623,13 +635,6 @@ class AddBookUI extends React.Component {
                   {getFieldDecorator('modalContentEdit')(
                     <TextArea rows={16} />,
                   )}
-                </FormItem>
-                <FormItem>
-                  <Button onClick={this.handleCancel}>Hủy</Button>
-                  &nbsp;
-                  <Button type="primary" onClick={this.handleSave}>
-                    Lưu
-                  </Button>
                 </FormItem>
               </Form>
             </Modal>
@@ -643,23 +648,23 @@ class AddBookUI extends React.Component {
               </Button>
             </Upload>
             <hr />
-
-            <Select
-              className="select_action"
-              style={{ width: 140 }}
-              placeholder="Hành động"
+            <Dropdown
+              overlay={menu}
+              trigger={['click']}
+              className="dropdown-action"
             >
-              <Option value="delete" onClick={this.handleDeleteAll}>
-                Xóa
-              </Option>
-            </Select>
+              <Button>
+                Hành động
+                <Icon type="down" />
+              </Button>
+            </Dropdown>
             {/* Table */}
             {table}
           </div>
           <Button
             className="addbook"
             type="primary"
-            htmlType="submit"
+            onClick={this.handleSubmit}
             disabled={disableButton}
           >
             Thêm sách
@@ -669,6 +674,6 @@ class AddBookUI extends React.Component {
     );
   }
 }
-const App = Form.create()(AddBookUI);
+const AddBook = Form.create()(AddBookUI);
 
-export default App;
+export default AddBook;

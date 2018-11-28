@@ -6,7 +6,7 @@ const AddbookUIStyle = styled.div`
   .ant-breadcrumb a {
     font-size: 18px;
     color: black;
-    font-weight: bold;
+    font-weight: 600;
   }
   h3 {
     margin-top: 10px;
@@ -51,12 +51,11 @@ const AddbookUIStyle = styled.div`
     background-color: #ffbf48;
     border: none;
   }
-  .select_action {
+  .dropdown-action {
     margin-left: 90px;
-    margin-bottom: 16px;
+    margin-bottom:20px;
     margin-top: 8px;
-    height: 40px;
-    color: #ff6666;
+    height: 35px;
   }
   hr {
     width: 80%;

@@ -1,106 +1,196 @@
 {
-  "books": {
-    "results": [
-      {
-        "id": 1,
-        "title": "Anh hùng xạ điêu",
-        "authors": [
-          {
-            "id": "123sad",
-            "name": "Kim Dung",
-            "slug": "kim-dung.123sad"
-          },
-          {
-            "id": "123sss",
-            "name": "Hoat Pro",
-            "slug": "hoat-pro.123sss"
+  "books":{
+    "status": 1,
+    "results": {
+      "items": [
+        {
+          "id": "5b97800a911f176704c41f75",
+          "title": "Cha giàu cha nghèo",
+          "image": "http://via.placeholder.com/218x218",
+          "publishingCompany": "Lao động - Xã hội",
+          "translator": "Nguyễn Huy Linh",
+          "categoryIds": [
+            "5b977f97911f176704c41f5a",
+            "5b977f97911f176704c41f5a"
+          ],
+          "authorIds": [
+            "5b97800a911f176704c41f6b",
+            "5b97800a911f176704c41f6d",
+            "5b97800a911f176704c41f6b",
+            "5b97800a911f176704c41f6d"
+          ],
+          "fileName": "ChaGiauChaNgheo.docx",
+          "slug": "cha-giau-cha-ngheo-5b97800a911f176704c41f75",
+          "publicationYear":2015,
+          "statusId": 5,
+          "ownerBy": "danhhuan93@gmail.com",
+          "createdBy": "greawar93@gmail.com",
+          "categories": [
+            {
+              "id": "5b977f97911f176704c41f5a",
+              "name": "văn hoá xã hội",
+              "slug": "van-hoa-xa-hoi"
+            }
+          ],
+          "authors": [
+            {
+              "id": "5b97800a911f176704c41f6b",
+              "name": "sharon l.lechter",
+              "slug": "sharon-llechter-5b97800a911f176704c41f6b"
+            },
+            {
+              "id": "5b97800a911f176704c41f6d",
+              "name": "robert t. kiyosaki",
+              "slug": "robert-t-kiyosaki-5b97800a911f176704c41f6d"
+            }
+          ],
+          "status": {
+            "id": 5,
+            "name": "Đang tổng hợp"
           }
-        ],
-        "categories": [
-          {
-            "id": "123sads",
-            "name": "Xuyên không",
-            "slug": "xuyen-khong.123sads"
-          },
-          {
-            "id": "123sada",
-            "name": "Tiên hiệp",
-            "slug": "tien-hiep.123sada"
+        },
+        {
+          "id": "5b97800a911f176704c41f76",
+          "title": "Nền giáo dục của người giàu - Những tay tỉ phú học gì từ trường đời?",
+          "image": "http://via.placeholder.com/218x218",
+          "publishingCompany": "Lao động",
+          "translator": "Thảo Nguyên",
+          "categoryIds": [
+            "5b977f97911f176704c41f5a"
+          ],
+          "authorIds": [
+            "5b97800a911f176704c41f6f"
+          ],
+          "fileName": "NenGiaoDucCuaNguoiGiauNhungTayTiPhuHocGiTuTruongDoi.docx",
+          "slug": "nen-giao-duc-cua-nguoi-giau---nhung-tay-ti-phu-hoc-gi-tu-truong-oi-5b97800a911f176704c41f76",
+          "publicationYear": 2015,
+          "statusId": 1,
+          "ownerBy": "danhhuan93@gmail.com",
+          "categories": [
+            {
+              "id": "5b977f97911f176704c41f5a",
+              "name": "văn hoá xã hội",
+              "slug": "van-hoa-xa-hoi"
+            }
+          ],
+          "authors": [
+            {
+              "id": "5b97800a911f176704c41f6f",
+              "name": "michael ellsberg",
+              "slug": "michael-ellsberg-5b97800a911f176704c41f6f"
+            }
+          ],
+          "status": {
+            "id": 1,
+            "name": "Chưa có nội dung"
           }
-        ],
-        "publishingCompany": "Giáo dục",
-        "publishYear": 2016,
-        "publishMonth": 2,
-        "createdBy": "Juna Phạm",
-        "pageNumber": 250,
-        "status": "Hoàn thành",
-        "slug": "anh-hung-xa-dieu"
-      },
-      {
-        "id": 2,
-        "title": "Đồ long đao",
-        "authors": [
-          {
-            "id": "123sxa",
-            "name": "Cổ Long",
-            "slug": "co-long.123sxa"
-          },
-          {
-            "id": "123qwa",
-            "name": "Vân Dung",
-            "slug": "van-dung.123qwa"
+        },
+        {
+          "id": "5b97800a911f176704c41f77",
+          "title": "Quyền lực: Vì sao người có kẻ không?",
+          "image": "http://via.placeholder.com/218x218",
+          "publishingCompany": "Lao động",
+          "translator": "Thu Huyền",
+          "categoryIds": [
+            "5b977f97911f176704c41f5f"
+          ],
+          "authorIds": [
+            "5b97800a911f176704c41f71"
+          ],
+          "fileName": "QuyenLucViSaoNguoiCoKeKhong.docx",
+          "slug": "quyen-luc-vi-sao-nguoi-co-ke-khong-5b97800a911f176704c41f77",
+          "publicationYear": 2016,
+          "statusId": 1,
+          "ownerBy": "danhhuan93@gmail.com",
+          "createdBy": "danhhuan93@gmail.com",
+          "categories": [
+            {
+              "id": "5b977f97911f176704c41f5f",
+              "name": "khoa học xã hội",
+              "slug": "khoa-hoc-xa-hoi"
+            }
+          ],
+          "authors": [
+            {
+              "id": "5b97800a911f176704c41f71",
+              "name": "jeffrey pfeffer",
+              "slug": "jeffrey-pfeffer-5b97800a911f176704c41f71"
+            }
+          ],
+          "status": {
+            "id": 1,
+            "name": "Chưa có nội dung"
           }
-        ],
-        "categories": [
-          {
-            "id": "234sss",
-            "name": "Kiếm hiệp",
-            "slug": "kiem-hiep.234sss"
-          },
-          {
-            "id": "234sac",
-            "name": "Tiểu thuyết",
-            "slug": "tieu-thuyet.234sac"
+        },
+        {
+          "id": "5b97800a911f176704c41f78",
+          "title": "Dạy con làm giàu (tập 1)",
+          "image": "http://via.placeholder.com/218x218",
+          "publishingCompany": "Trẻ",
+          "translator": "Thiên Kim",
+          "categoryIds": [
+            "5b977f97911f176704c41f5a"
+          ],
+          "authorIds": [
+            "5b97800a911f176704c41f6d"
+          ],
+          "fileName": "DayConLamGiauTap1.docx",
+          "slug": "day-con-lam-giau-tap-1-5b97800a911f176704c41f78",
+          "publicationYear": 2017,
+          "statusId": 1,
+          "ownerBy": "danhhuan93@gmail.com",
+          "createdBy": "danhhuan93@gmail.com",
+          "categories": [
+            {
+              "id": "5b977f97911f176704c41f5a",
+              "name": "văn hoá xã hội",
+              "slug": "van-hoa-xa-hoi"
+            }
+          ],
+          "authors": [
+            {
+              "id": "5b97800a911f176704c41f6d",
+              "name": "robert t. kiyosaki",
+              "slug": "robert-t-kiyosaki-5b97800a911f176704c41f6d"
+            }
+          ],
+          "status": {
+            "id": 1,
+            "name": "Chưa có nội dung"
           }
-        ],
-        "publishingCompany": "Trí tuệ",
-        "publishYear": 2017,
-        "publishMonth": 9,
-        "createdBy": "Na Na",
-        "pageNumber": 250,
-        "status": "Đang xử lý",
-        "slug": "do-long-dao"
-      },
-      {
-        "id": 3,
-        "title": "Vẽ em bằng màu nỗi nhớ",
-        "authors": [
-          {
-            "id": "5642ss",
-            "name": "Băng Tâm",
-            "slug": "bang-tam.5642ss"
+        },
+        {
+          "id": "5bd2cf311be4ec224412c54a",
+          "title": "Test 1",
+          "image": "http://via.placeholder.com/218x218",
+          "publishingCompany": "Lao động - Xã hội",
+          "translator": "Nguyễn Huy Linh",
+          "slug": "test-1-5bd2cf311be4ec224412c54a",
+          "ownerBy": "danhhuan93@gmail.com",
+          "createdBy": "vodanh1204@gmail.com",
+          "createdAt": 1540542257872,
+          "categories": [
+            {
+              "id": "5b977f97911f176704c41f5a",
+              "name": "văn hoá xã hội",
+              "slug": "van-hoa-xa-hoi"
+            }
+          ],
+          "authors": [
+            {
+              "id": "5b97800a911f176704c41f6b",
+              "name": "sharon l.lechter",
+              "slug": "sharon-llechter-5b97800a911f176704c41f6b"
+            }
+          ],
+          "status": {
+            "id": 1,
+            "name": "Chưa có nội dung"
           }
-        ],
-        "categories": [
-          {
-            "id": "5432aaa",
-            "name": "Tiểu thuyết",
-            "slug": "tieu-thuyet.5432aaa"
-          },
-          {
-            "id": "5432asa",
-            "name": "Truyện dài",
-            "slug": "truyen-dai.5432asa"
-          }
-        ],
-        "publishingCompany": "Thanh niên",
-        "publishYear": 2015,
-        "publishMonth": 1,
-        "createdBy": "Văn Phương",
-        "pageNumber": 650,
-        "status": "Hoàn thành",
-        "slug": "ve-em-bang-mau-noi-nho"
-      }
-    ]
+        }
+      ],
+      "count": 5
+    }
   }
+
 }

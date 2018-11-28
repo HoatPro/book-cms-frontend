@@ -1,7 +1,8 @@
 import React from 'react';
-import { Form, Icon, Input, Button, Breadcrumb } from 'antd';
+import { Form, Icon, Input, Button, Breadcrumb, message } from 'antd';
 import { UsersRolesWrapper } from './UsersRoles.style';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 const FormItem = Form.Item;
 class AddUser extends React.Component {
   handleSubmit = e => {
@@ -10,6 +11,26 @@ class AddUser extends React.Component {
       if (!err) {
         console.log('Received values of form: ', values);
       }
+      axios({
+        method: 'POST',
+        url: `http://localhost:8080/api/v1/users`,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+        data: {
+          email: values.email,
+          ownerBy: 'danhhuan93@gmail.com',
+          name: values.firstName + values.userName,
+        },
+      }).then(res => {
+        console.log(res);
+        if (res.status) {
+          message.success('Thêm user thành  công!');
+          let path = `/user-role`;
+          this.props.history.push(path);
+        }
+      });
     });
   };
   handleCancel = () => {
@@ -35,16 +56,23 @@ class AddUser extends React.Component {
           <Form onSubmit={this.handleSubmit} className="login-form">
             <FormItem label="First Name:">
               {getFieldDecorator('firstName')(
-                <Input placeholder="FirstName" />,
+                <Input placeholder="First Name" />,
               )}
             </FormItem>
             <FormItem label="Last Name:">
-              {getFieldDecorator('userName')(<Input placeholder="LastName" />)}
+              {getFieldDecorator('userName')(<Input placeholder="Last Name" />)}
             </FormItem>
             <FormItem label="Email (This will be the user 's UserID)">
               {getFieldDecorator('email', {
                 rules: [
-                  { required: true, message: 'Email không được để trống' },
+                  {
+                    type: 'email',
+                    message: 'Tên email không hợp lệ !!',
+                  },
+                  {
+                    required: true,
+                    message: 'Email không được để trống',
+                  },
                 ],
               })(
                 <Input
@@ -57,8 +85,13 @@ class AddUser extends React.Component {
             </FormItem>
 
             <FormItem>
-              <Button type="primary" htmlType="submit" className="form-button">
-                Lưu
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="form-button"
+                style={{ marginRight: '7px' }}
+              >
+                Thêm
               </Button>
               &nbsp;
               <Button type="danger" onClick={this.handleCancel}>

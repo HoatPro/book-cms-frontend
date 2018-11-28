@@ -1,41 +1,247 @@
 import React from 'react';
-import { Table, Menu, Button, Input, Dropdown, Icon, Modal, Form } from 'antd';
+import {
+  Table,
+  Menu,
+  Button,
+  Input,
+  Dropdown,
+  Icon,
+  Modal,
+  message,
+  Form,
+} from 'antd';
 import { ManagerAuthorWrapper } from './ManagerAuthor.style';
-import ModalEdit from './ModalEdit';
-import ModalAdd from './ModalAdd';
-const Search = Input.Search;
+import ModalAddAuthor from './ModalAddAuthor';
+import reqwest from 'reqwest';
+import axios from 'axios';
 
-const data = [
-  {
-    key: '1',
-    index: '1',
-    name: 'Nguyễn Nhật Ánh',
-    createdBy: 'vodanh1204@gmail.com',
-    createdAt: '',
-  },
-  {
-    key: '2',
-    index: '2',
-    name: 'Thần Đồng',
-    createdBy: 'vodanh1204@gmail.com',
-    createdAt: '',
-  },
-];
+const Search = Input.Search;
+const FormItem = Form.Item;
+const { TextArea } = Input;
+
 class ManagerAuthor extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { visibleEdit: false, visibleAdd: false };
+    this.state = {
+      dataTable: [],
+      dataObj: {},
+      pagination: {},
+      visibleEdit: false,
+      visibleAdd: false,
+      keyEdit: null,
+      keyword: '',
+    };
   }
-  showModalEdit = () => {
-    this.setState({ visibleEdit: true });
+
+  //thay đổi trang
+  handleTableChange = (pagination, filters) => {
+    const pager = { ...this.state.pagination };
+    pager.current = pagination.current;
+    this.setState({
+      pagination: pager,
+    });
+    this.callApi({
+      results: pagination.pageSize,
+      page: pagination.current - 1,
+      keyword: this.state.keyword,
+      ...filters,
+    });
   };
+  async componentDidMount() {
+    axios({
+      method: 'GET',
+      url: `http://localhost:8080/api/v1/authors?size=10`,
+      withCredentials: true,
+    }).then(res => {
+      const pagination = { ...this.state.pagination };
+      pagination.total = 10 * res.data.results.totalPages;
+      const dataAuthor = res.data.results.items;
+      console.log(res);
+      const dataObj = {};
+      const dataTable = dataAuthor.map((data, index) => {
+        dataObj[data.id] = data;
+        return {
+          ...data,
+          key: data.id,
+          index: index + 1,
+        };
+      });
+      this.setState({
+        dataTable: dataTable,
+        dataObj,
+        pagination,
+      });
+    });
+  }
+  callApi = (params = {}) => {
+    this.setState({ loading: true });
+    reqwest({
+      url: `http://localhost:8080/api/v1/authors?size=10`,
+      method: 'GET',
+      withCredentials: true,
+      data: {
+        results: 10,
+        ...params,
+      },
+      type: 'json',
+    }).then(data => {
+      const pagination = { ...this.state.pagination };
+      // Read total count from server
+      const {
+        results: { totalPages, items },
+      } = data;
+      pagination.total = 10 * totalPages;
+      const dataAuthor = items;
+      const dataObj = {};
+      const dataTable = dataAuthor.map((data, index) => {
+        dataObj[data.id] = data;
+        return {
+          ...data,
+          key: data.id,
+          index: index + 1 + (pagination.current - 1) * 10,
+        };
+      });
+      this.setState({
+        loading: false,
+        dataTable: dataTable,
+        pagination,
+        dataObj,
+      });
+    });
+  };
+  //Thêm tác giả
   showModalAdd = () => {
     this.setState({ visibleAdd: true });
   };
   closeModal = visible => {
-    this.setState({ visibleEdit: visible, visibleAdd: visible });
+    this.setState({ visibleAdd: visible });
   };
-  getColums = () => {
+
+  // Sửa tác giả
+  handleEdit = key => {
+    const { dataObj } = this.state;
+    // var date = new Date(dataObj[key].birthDate);
+    // var myDate = new Date(date);
+    // console.log(myDate.toLocaleDateString());
+    // const birthDate = myDate.toLocaleDateString();
+    this.props.form.setFieldsValue({
+      nameEdit: dataObj[key].name,
+      birthDateEdit: dataObj[key].birthDate,
+      descriptionEdit: dataObj[key].description,
+    });
+    this.setState({
+      visibleEdit: true,
+      keyEdit: key,
+    });
+  };
+  handleSaveEdit = () => {
+    const { keyEdit } = this.state;
+    this.props.form.validateFields((err, fieldsValue) => {
+      if (!err) {
+        axios({
+          method: 'PUT',
+          url: `http://localhost:8080/api/v1/authors/${keyEdit}`,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+          data: {
+            name: fieldsValue['nameEdit'],
+            birthDate: fieldsValue['birthDateEdit'],
+            description: fieldsValue['descriptionEdit'],
+          },
+        }).then(res => {
+          console.log(res);
+          if (res.status) {
+            const { dataTable } = this.state;
+            console.log(res);
+            message.success('Sửa tác giả thành công !');
+            this.setState(
+              {
+                visibleEdit: false,
+                dataTable: dataTable.map(item => {
+                  if (item.id !== keyEdit) return item;
+                  return {
+                    ...item,
+                    name: fieldsValue['nameEdit'],
+                    birthDate: fieldsValue['birthDateEdit'],
+                    description: fieldsValue['descriptionEdit'],
+                  };
+                }),
+              },
+              function() {
+                this.updateDataObj();
+              },
+            );
+          }
+        });
+      }
+    });
+  };
+  updateDataObj = () => {
+    const { dataTable } = this.state;
+    console.log(dataTable);
+    const dataObj = {};
+    dataTable.map(data => {
+      dataObj[data.id] = data;
+    });
+    this.setState({
+      dataObj: dataObj,
+    });
+  };
+  handleCancel = () => {
+    this.setState({ visibleEdit: false });
+  };
+  //Xóa tác giả
+  handleDelete = key => {
+    const { dataObj } = this.state;
+    const authorId = dataObj[key].id;
+    axios({
+      method: 'DELETE',
+      url: `http://localhost:8080/api/v1/authors/${authorId}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+    }).then(res => {
+      console.log(res);
+      if (res.status) {
+        const dataTable = [...this.state.dataTable];
+        this.setState({
+          dataTable: dataTable.filter(item => item.id !== key),
+        });
+        message.success('Xóa tác giả thành công');
+      } else {
+        message.warning('Xóa bị lỗi!!');
+      }
+    });
+  };
+  //chuẩn hóa keyword
+  standardized = string => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+  //Tìm kiếm tác giả
+  onSearch = keyword => {
+    let keywordUp = this.standardized(keyword);
+    this.setState({ keyword: keywordUp });
+    axios({
+      method: 'GET',
+      url: `http://localhost:8080/api/v1/authors?keyword=${keywordUp}&size=10`,
+      withCredentials: true,
+    }).then(res => {
+      if (res.status) {
+        const dataAuthor = res.data.results.items;
+        const dataObj = {};
+        const dataTable = dataAuthor.map((data, index) => {
+          dataObj[data.id] = data;
+          return { ...data, key: data.id, index: index + 1 };
+        });
+        this.setState({ dataTable: dataTable, dataObj });
+      }
+    });
+  };
+  render() {
+    const { getFieldDecorator } = this.props.form;
     const columns = [
       {
         title: 'STT',
@@ -56,68 +262,103 @@ class ManagerAuthor extends React.Component {
         title: 'Ngày tạo',
         dataIndex: 'createdAt',
         key: 'createdAt',
+        render: record => {
+          var date = new Date(record);
+          var myDate = new Date(date);
+          return myDate.toLocaleDateString();
+        },
       },
       {
         title: 'Lựa chọn',
-        dataIndex: 'choice',
         key: 'choice',
-        render: () => {
+        render: record => {
           const menu = (
-            <Menu>
+            <Menu onClick={() => this.handleDelete(record.key)}>
               <Menu.Item style={{ width: 80 }}>Xóa</Menu.Item>
             </Menu>
           );
-
           return (
             <Dropdown.Button
               overlay={menu}
               trigger={['click']}
               placement="bottomCenter"
+              onClick={() => this.handleEdit(record.key)}
             >
-              <p onClick={this.showModalEdit}>Chỉnh sửa</p>
+              <span>Chỉnh sửa</span>
             </Dropdown.Button>
           );
         },
       },
     ];
-    return columns;
-  };
-  render() {
     return (
       <ManagerAuthorWrapper>
         <h3>Quản lý tác giả</h3>
         <hr />
-        <div className="home-content">
+        <div className="manager-author">
           <div className="action">
             <Button type="primary" onClick={this.showModalAdd}>
               <Icon type="plus" />
               Thêm
             </Button>
-            <Search className="search" placeholder="Tìm kiếm tác giả..." />
+            <Search
+              className="search"
+              placeholder="Tìm kiếm tác giả..."
+              enterButton={true}
+              onSearch={keyword => this.onSearch(keyword)}
+            />
           </div>
           <div className="table-author">
             <Table
               className="table-detail"
-              columns={this.getColums()}
-              dataSource={data}
+              columns={columns}
+              dataSource={this.state.dataTable}
               bordered
+              pagination={this.state.pagination}
+              loading={this.state.loading}
+              onChange={this.handleTableChange}
+              rowKey={record => record.id}
             />
           </div>
           <div className="modal-add">
-            <ModalAdd
+            <ModalAddAuthor
               visible={this.state.visibleAdd}
               closeModal={this.closeModal}
             />
           </div>
           <div className="modal-edit">
-            <ModalEdit
+            <Modal
               visible={this.state.visibleEdit}
-              closeModal={this.closeModal}
-            />
+              title="Chỉnh sửa tác giả"
+              onCancel={this.handleCancel}
+              onOk={this.handleSaveEdit}
+              cancelText="Hủy"
+              okText="Lưu"
+              width={800}
+            >
+              <Form layout="vertical">
+                <FormItem label="Tên tác giả">
+                  {getFieldDecorator('nameEdit', {
+                    rules: [
+                      {
+                        required: true,
+                        message: 'Tên tac giả không được để trống !',
+                      },
+                    ],
+                  })(<Input />)}
+                </FormItem>
+                <FormItem label="Năm sinh">
+                  {getFieldDecorator('birthDateEdit')(<Input />)}
+                </FormItem>
+                <FormItem label="Tiểu sử">
+                  {getFieldDecorator('descriptionEdit')(<TextArea rows={5} />)}
+                </FormItem>
+              </Form>
+            </Modal>
           </div>
         </div>
       </ManagerAuthorWrapper>
     );
   }
 }
-export default ManagerAuthor;
+const WrappedAuthor = Form.create()(ManagerAuthor);
+export default WrappedAuthor;

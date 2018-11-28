@@ -1,21 +1,8 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Form,
-  Input,
-  Tooltip,
-  Icon,
-  Cascader,
-  Select,
-  Row,
-  Col,
-  Checkbox,
-  Button,
-  AutoComplete,
-} from 'antd';
+import { Form, Input, Checkbox, Button } from 'antd';
+import { RegisterWrapper } from './Register.style';
 const FormItem = Form.Item;
-const Option = Select.Option;
-const AutoCompleteOption = AutoComplete.Option;
 
 class Register extends Component {
   constructor() {
@@ -65,22 +52,10 @@ class Register extends Component {
     }
     callback();
   };
-  handleWebsiteChange = value => {
-    let autoCompleteResult;
-    if (!value) {
-      autoCompleteResult = [];
-    } else {
-      autoCompleteResult = ['.com', '.org', '.net'].map(
-        domain => `${value}${domain}`,
-      );
-    }
-    this.setState({
-      autoCompleteResult,
-    });
-  };
+
   render() {
     const { getFieldDecorator } = this.props.form;
-    const { autoCompleteResult } = this.state;
+
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -103,142 +78,98 @@ class Register extends Component {
         },
       },
     };
-    const prefixSelector = getFieldDecorator('prefix', {
-      initialValue: '84',
-    })(
-      <Select style={{ width: 70 }}>
-        <Option value="84">+84</Option>
-        <Option value="87">+87</Option>
-      </Select>,
-    );
-    const websiteOptions = autoCompleteResult.map(website => (
-      <AutoCompleteOption key={website}>{website}</AutoCompleteOption>
-    ));
+
     return (
-      <Form onSubmit={this.handleSubmit}>
-        <FormItem {...formItemLayout} label="E-mail">
-          {getFieldDecorator('email', {
-            rules: [
-              {
-                type: 'email',
-                message: 'The input is not valid E-mail!',
-              },
-              {
-                required: true,
-                message: 'Please input your E-mail! ',
-              },
-            ],
-          })(<Input />)}
-        </FormItem>
-        <FormItem {...formItemLayout} label="Password">
-          {getFieldDecorator('password', {
-            rules: [
-              {
-                required: true,
-                message: 'Please input your password !!',
-              },
-              {
-                validator: this.validateToNextPassword,
-              },
-            ],
-          })(<Input type="password" />)}
-        </FormItem>
-        <FormItem {...formItemLayout} label="Confirm Password">
-          {getFieldDecorator('confirm', {
-            rules: [
-              {
-                required: true,
-                message: 'Please confirm your password!',
-              },
-              {
-                validator: this.compareToFirstPassword,
-              },
-            ],
-          })(<Input type="password" onBlur={this.handleConfirmBlur} />)}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label={
-            <span>
-              Nickname&nbsp;
-              <Tooltip title="What do you want others to call you?">
-                <Icon type="question-circle-o" />
-              </Tooltip>
-            </span>
-          }
-        >
-          {getFieldDecorator('nickname', {
-            rules: [
-              {
-                required: true,
-                message: 'Please input your nickname!',
-                whitespace: true,
-              },
-            ],
-          })(<Input />)}
-        </FormItem>
-        <FormItem {...formItemLayout} label="Phone Number">
-          {getFieldDecorator('phone', {
-            rules: [
-              {
-                required: true,
-                message: 'Please input your phone number!',
-              },
-            ],
-          })(<Input addonBefore={prefixSelector} style={{ width: '100%' }} />)}
-        </FormItem>
-        <FormItem {...formItemLayout} label="Website">
-          {getFieldDecorator('website', {
-            rules: [{ required: true, message: 'Please input website!' }],
-          })(
-            <AutoComplete
-              dataSource={websiteOptions}
-              onChange={this.handleWebsiteChange}
-              placeholder="website"
-            >
-              <Input />
-            </AutoComplete>,
-          )}
-        </FormItem>
-        <FormItem
-          {...formItemLayout}
-          label="Captcha"
-          extra="We must make sure that your are a human."
-        >
-          <Row gutter={8}>
-            <Col span={12}>
-              {getFieldDecorator('captcha', {
-                rules: [
-                  {
-                    required: true,
-                    message: 'Please input the captcha you got!',
-                  },
-                ],
-              })(<Input />)}
-            </Col>
-            <Col span={12}>
-              <Button>Get captcha</Button>
-            </Col>
-          </Row>
-        </FormItem>
-        <FormItem {...tailFormItemLayout}>
-          {getFieldDecorator('agreement', {
-            valuePropName: 'checked',
-          })(
-            <Checkbox>
-              I have read the <a href="">agreement</a>
-            </Checkbox>,
-          )}
-        </FormItem>
-        <FormItem {...tailFormItemLayout}>
-          <Button type="primary" htmlType="submit">
-            Register
-          </Button>
-          <Link to="/login" className="FormField__Link">
-            I'm already member
-          </Link>
-        </FormItem>
-      </Form>
+      <RegisterWrapper>
+        <Form onSubmit={this.handleSubmit} className="register-form">
+          <h2>Đăng ký hệ thống quản lý sách</h2>
+          <FormItem {...formItemLayout} label="First Name">
+            {getFieldDecorator('firstName', {
+              rules: [
+                {
+                  type: 'text',
+                },
+                {
+                  required: true,
+                  message: 'Please input First Name ',
+                },
+              ],
+            })(<Input />)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="Last Name">
+            {getFieldDecorator('lastName', {
+              rules: [
+                {
+                  type: 'text',
+                },
+                {
+                  required: true,
+                  message: 'Please input Last Name ',
+                },
+              ],
+            })(<Input />)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="E-mail">
+            {getFieldDecorator('email', {
+              rules: [
+                {
+                  type: 'email',
+                  message: 'The input is not valid E-mail!',
+                },
+                {
+                  required: true,
+                  message: 'Please input your E-mail! ',
+                },
+              ],
+            })(<Input />)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="Password">
+            {getFieldDecorator('password', {
+              rules: [
+                {
+                  required: true,
+                  message: 'Please input your password !!',
+                },
+                {
+                  validator: this.validateToNextPassword,
+                },
+              ],
+            })(<Input type="password" />)}
+          </FormItem>
+          <FormItem {...formItemLayout} label="Confirm Password">
+            {getFieldDecorator('confirm', {
+              rules: [
+                {
+                  required: true,
+                  message: 'Please confirm your password!',
+                },
+                {
+                  validator: this.compareToFirstPassword,
+                },
+              ],
+            })(<Input type="password" onBlur={this.handleConfirmBlur} />)}
+          </FormItem>
+
+          <FormItem {...tailFormItemLayout}>
+            {getFieldDecorator('agreement', {
+              valuePropName: 'checked',
+            })(
+              <Checkbox>
+                I have read the <a href="">agreement</a>
+              </Checkbox>,
+            )}
+          </FormItem>
+          <FormItem {...tailFormItemLayout}>
+            <Button type="primary" htmlType="submit">
+              Register
+            </Button>
+            &nbsp;
+            <Link to="/" className="FormField__Link">
+              I'm already member
+            </Link>
+          </FormItem>
+        </Form>
+      </RegisterWrapper>
     );
   }
 }

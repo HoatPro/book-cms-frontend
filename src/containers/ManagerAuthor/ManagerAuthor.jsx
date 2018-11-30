@@ -56,7 +56,6 @@ class ManagerAuthor extends React.Component {
       const pagination = { ...this.state.pagination };
       pagination.total = 10 * res.data.results.totalPages;
       const dataAuthor = res.data.results.items;
-      console.log(res);
       const dataObj = {};
       const dataTable = dataAuthor.map((data, index) => {
         dataObj[data.id] = data;
@@ -151,10 +150,8 @@ class ManagerAuthor extends React.Component {
             description: fieldsValue['descriptionEdit'],
           },
         }).then(res => {
-          console.log(res);
           if (res.status) {
             const { dataTable } = this.state;
-            console.log(res);
             message.success('Sửa tác giả thành công !');
             this.setState(
               {
@@ -180,7 +177,6 @@ class ManagerAuthor extends React.Component {
   };
   updateDataObj = () => {
     const { dataTable } = this.state;
-    console.log(dataTable);
     const dataObj = {};
     dataTable.map(data => {
       dataObj[data.id] = data;
@@ -204,7 +200,6 @@ class ManagerAuthor extends React.Component {
       },
       withCredentials: true,
     }).then(res => {
-      console.log(res);
       if (res.status) {
         const dataTable = [...this.state.dataTable];
         this.setState({
@@ -234,7 +229,11 @@ class ManagerAuthor extends React.Component {
         const dataObj = {};
         const dataTable = dataAuthor.map((data, index) => {
           dataObj[data.id] = data;
-          return { ...data, key: data.id, index: index + 1 };
+          return {
+            ...data,
+            key: data.id,
+            index: index + 1,
+          };
         });
         this.setState({ dataTable: dataTable, dataObj });
       }

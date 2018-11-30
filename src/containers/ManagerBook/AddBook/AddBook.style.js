@@ -7,20 +7,22 @@ const AddbookStyle = styled.div`
   .ant-breadcrumb a {
     font-size: 18px;
     color: black;
-    font-weight:600;
+    font-weight: 600;
   }
   sc-bwzfXH llpUzL {
     margin-left: 20px;
   }
   h3 {
     margin-top: 30px;
-    font-size:16px;
-    font-weight:500;
+    font-size: 18px;
+    font-weight: 500;
   }
 
   h4 {
     margin-top: 30px;
+    font-weight: 430;
   }
+
   .box1 {
     height: 150px;
     width: 80%;
@@ -37,10 +39,14 @@ const AddbookStyle = styled.div`
     margin-top: 54px;
     margin-left: 420px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
+    width: 120px;
+  }
+  .box1 button span {
+    margin-left: -3px;
   }
   .box1 i {
-    padding-left: 5px;
+    margin-left: -10px;
     width: 35px;
   }
   .box21 {
@@ -67,7 +73,7 @@ const AddbookStyle = styled.div`
     border: 2px solid;
     background-color: white;
     margin-top: 2px;
-    margin-bottom :30px;
+    margin-bottom: 30px;
   }
   .box22 h4 {
     font-size: 20px;

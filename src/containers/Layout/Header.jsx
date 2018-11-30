@@ -3,6 +3,7 @@ import { HeaderWrapper } from './Layout.style';
 import { Dropdown, Icon, Avatar, Menu } from 'antd';
 import { Link } from 'react-router-dom';
 import { Login } from '.././Login/Login';
+
 const email = 'vodanh1204@gmail.com';
 class Header extends React.Component {
   constructor(props) {
@@ -16,7 +17,9 @@ class Header extends React.Component {
     console.log(this.props.params);
     console.log('a');
   };
-
+  getEmail = values => {
+    console.log(values);
+  };
   render() {
     const menu = (
       <Menu onClick={this.handleMenuClick}>

@@ -8,6 +8,14 @@ const UsersRolesWrapper = styled.div`
     color: #000;
     font-weight: 500;
   }
+  .ant-breadcrumb span {
+    font-size: 18px;
+    color: #000;
+    font-weight: 500;
+  }
+  .ant-breadcrumb span :hover {
+    color: #5eccff;
+  }
   .user_wrapper p {
     float: left;
     margin-top: 50px;
@@ -15,6 +23,7 @@ const UsersRolesWrapper = styled.div`
     font-weight: bold;
     margin-left: 4px;
     padding-left: 20px;
+    color: #40a9ff;
   }
 
   .search {
@@ -24,24 +33,28 @@ const UsersRolesWrapper = styled.div`
   }
   .table_user {
     width: 95%;
-
-
   }
   .form_user_infomation {
     width: 50%;
   }
-
+  .ant-form-item-required {
+    float: left;
+  }
+  .ant-col-6 {
+    width: 18%;
+  }
   h6 {
     font-size: 17px;
     /* color: rgba(0, 0, 0, 0.65); */
-    font-weight: 430;
+    font-weight: 400;
   }
   h5 {
     font-size: 18px;
-
   }
+
   li {
-    font-size: 16px;
+
+    font-size:16px;
   }
   .tag {
     width: 350px;

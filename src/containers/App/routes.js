@@ -20,5 +20,5 @@ export default {
   //users-roles
   userAndRole: '/user-role',
   addUser: '/user-role/add-user',
-  detailUser: '/user-role/detail-user',
+  detailUser: '/user-role/detail-user/:userId',
 };

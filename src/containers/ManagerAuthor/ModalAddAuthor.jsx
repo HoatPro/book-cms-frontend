@@ -1,8 +1,9 @@
 import React from 'react';
-import { Form, Modal, Input, message } from 'antd';
+import { Form, Modal, Input, InputNumber, message } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import axios from 'axios';
 const FormItem = Form.Item;
+
 const ModalAddAuthor = Form.create()(
   class extends React.Component {
     handleCancel = () => {
@@ -67,7 +68,9 @@ const ModalAddAuthor = Form.create()(
               })(<Input />)}
             </FormItem>
             <FormItem label="Năm sinh">
-              {getFieldDecorator('birthDate')(<Input />)}
+              {getFieldDecorator('birthDate')(
+                <InputNumber style={{ width: '100%' }} />,
+              )}
             </FormItem>
             <FormItem label="Mô tả">
               {getFieldDecorator('description')(<TextArea rows={5} />)}

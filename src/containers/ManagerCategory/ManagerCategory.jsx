@@ -5,7 +5,6 @@ import {
   Button,
   Input,
   Dropdown,
-  Select,
   Icon,
   Form,
   Modal,
@@ -112,7 +111,11 @@ class ManagerCategory extends React.Component {
   };
   //chuẩn hóa keyword
   standardized = string => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    let str = string.replace(
+      /[^0-9a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s]/gi,
+      '',
+    );
+    return str.charAt(0).toUpperCase() + str.slice(1);
   };
   //Tìm kiếm thể loại
   onSearch = keyword => {
@@ -237,6 +240,7 @@ class ManagerCategory extends React.Component {
       }
     });
   };
+
   render() {
     const { getFieldDecorator } = this.props.form;
     const columns = [

@@ -23,10 +23,11 @@ const data = [
 
 class DashBoard extends React.Component {
   componentWillReceiveProps(nextProps) {
+    console.log(this.props.match.params);
     console.log(nextProps);
   }
-
   render() {
+    console.log(this.props.match.params);
     const data1 = [
       {
         key: '1',

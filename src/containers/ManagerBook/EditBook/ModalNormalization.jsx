@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { Table, Input, Form, Checkbox, Button, Modal, message } from 'antd';
 import { NormalizationWrapper } from './Normalization.style';
 import axios from 'axios';
@@ -119,13 +118,13 @@ class ModalNormalization extends React.Component {
         title: '#',
         dataIndex: 'index',
         key: 'index',
-        width: '10%',
+        width: '10.1%',
       },
       {
         title: 'Cụm từ',
         dataIndex: 'key',
         key: 'key',
-        width: '40%',
+        width: '40.1%',
       },
       {
         title: 'Cách đọc',
@@ -145,30 +144,34 @@ class ModalNormalization extends React.Component {
       },
     ];
   }
+
   changeStatus = str => {
     if (str == 'unchecked') return false;
     else if (str == 'checked') return true;
   };
   componentWillReceiveProps(nextProps) {
-    if (!nextProps.dataChapterNormalization) return;
-    let normalizationValue = JSON.parse(nextProps.dataChapterNormalization);
-    let { words } = normalizationValue;
-    const dataObj = {};
-    if (words) {
-      words = words.map((word, index) => {
-        dataObj[word.key] = word;
-        return {
-          ...word,
-          index: index + 1,
-          checked: this.changeStatus(word.status),
-        };
+    if (!nextProps.dataChapterNormalization) {
+      this.setState({ data: [] });
+    } else {
+      let normalizationValue = JSON.parse(nextProps.dataChapterNormalization);
+      let { words } = normalizationValue;
+      const dataObj = {};
+      if (words) {
+        words = words.map((word, index) => {
+          dataObj[word.key] = word;
+          return {
+            ...word,
+            index: index + 1,
+            checked: this.changeStatus(word.status),
+          };
+        });
+      }
+      this.setState({
+        dataObj,
+        data: words,
+        dataNormalization: nextProps.dataNormalization,
       });
     }
-    this.setState({
-      dataObj,
-      data: words,
-      dataNormalization: nextProps.dataNormalization,
-    });
   }
   handleSave = row => {
     const { data } = this.state;
@@ -192,7 +195,6 @@ class ModalNormalization extends React.Component {
   //Bang Expand
   onExpand = record => {
     const dataExpand = record.expandations;
-
     const dataConvert = dataExpand.map((data, index) => {
       return {
         index: index,
@@ -238,7 +240,7 @@ class ModalNormalization extends React.Component {
         title: 'Cách đọc',
         dataIndex: 'expandation',
         key: 'expandation',
-        width: '50.28%',
+        width: '50.1%',
         editable: true,
       },
     ];
@@ -267,6 +269,7 @@ class ModalNormalization extends React.Component {
 
     return (
       <Table
+        className="table-expand"
         // scroll={{ y: 200 }}
         components={componentsExpand}
         columns={columnsExpand}
@@ -311,7 +314,6 @@ class ModalNormalization extends React.Component {
 
   render() {
     const { visible } = this.props;
-
     const components = {
       body: {
         row: EditableFormRow,

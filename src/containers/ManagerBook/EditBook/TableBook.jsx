@@ -4,7 +4,6 @@ import {
   Form,
   Dropdown,
   Menu,
-  Button,
   Modal,
   Input,
   Select,
@@ -76,6 +75,7 @@ class TableBook extends React.Component {
   //Xóa 1 phần tử
   handleDelete = key => {
     //key chính là chapterID
+    //const {chapterId}=key
     const { bookId } = this.props;
     axios({
       method: 'DELETE',
@@ -95,19 +95,23 @@ class TableBook extends React.Component {
     });
   };
   // Xóa lựa chọn nhiều
-  handleDeleteTable = () => {
+  handleDeleteChapters = () => {
+    const { dataTable } = this.state;
+    const dataNew = [...dataTable];
     const { bookId } = this.props;
     const lastIndex = dataSelected.length - 1;
-    const arrayNumberSelected = dataSelected[lastIndex];
-    // const { dataTable } = this.state;
-    // const listId = [];
-    // for (let i in arrayNumberSelected) {
-    //   for (let j in dataTable) {
-    //     if (dataTable[j].orderNo === arrayNumberSelected[i]) {
-    //       listId.push(dataTable[j].key);
-    //     }
-    //   }
-    // }
+    const listSelected = dataSelected[lastIndex];
+    const arrayIndex = [];
+    dataTable.map((data, index) => {
+      listSelected.map(list => {
+        if (data.key === list) {
+          arrayIndex.push(index);
+        }
+      });
+    });
+    for (let i = arrayIndex.length - 1; i >= 0; i--) {
+      dataNew.splice(arrayIndex[i], 1);
+    }
     axios({
       method: 'DELETE',
       url: `http://localhost:8080/api/v1/books/${bookId}/chapters/`,
@@ -115,11 +119,13 @@ class TableBook extends React.Component {
         'Content-Type': 'application/json',
       },
       withCredentials: true,
-      data: arrayNumberSelected,
+      data: listSelected,
     }).then(res => {
       if (res.status) {
+        this.setState({
+          dataTable: dataNew,
+        });
         message.success('Xóa chương thành công!');
-        window.location.reload();
       }
     });
   };
@@ -353,7 +359,7 @@ class TableBook extends React.Component {
           </Option>
           <Option value="synthesis">Tổng hợp</Option>
           <Option value="normalization">Chuẩn hóa</Option>
-          <Option value="delete" onClick={this.handleDeleteTable}>
+          <Option value="delete" onClick={this.handleDeleteChapters}>
             Xóa
           </Option>
         </Select>

@@ -213,7 +213,11 @@ class ManagerBook extends React.Component {
           />
           <Button className="add_book" type="primary">
             <Link to="/addbook">
-              <Icon type="plus-circle" theme="outlined" />
+              <Icon
+                type="plus-circle"
+                theme="outlined"
+                style={{ marginRight: '2px' }}
+              />
               Thêm sách
             </Link>
           </Button>

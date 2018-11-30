@@ -5,6 +5,9 @@ import axios from 'axios';
 const FormItem = Form.Item;
 const ModalAddCategory = Form.create()(
   class extends React.Component {
+    constructor(props) {
+      super(props);
+    }
     handleCancel = () => {
       const { visible } = this.props;
       this.props.closeModal(!visible);
@@ -15,7 +18,6 @@ const ModalAddCategory = Form.create()(
         if (err) {
           return;
         }
-        console.log('Received values of form: ', values);
         axios({
           method: 'POST',
           url: `http://localhost:8080/api/v1/categories`,

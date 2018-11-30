@@ -1,11 +1,29 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import { Form, Icon, Input, Button, Checkbox, message } from 'antd';
 import { LoginWrapper } from './Login.style';
 import axios from 'axios';
 
 const FormItem = Form.Item;
 class Login extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      dataUser: [],
+    };
+  }
+  // componentDidMount() {
+  //   axios({
+  //     method: 'GET',
+  //     url: `http://localhost:8080/api/v1/users`,
+  //     withCredentials: true,
+  //   }).then(res => {
+  //     const dataUser = res.data.results.items;
+  //     this.setState({
+  //       dataUser: dataUser,
+  //     });
+  //   });
+  // }
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
@@ -34,11 +52,10 @@ class Login extends Component {
           .catch(err => {
             console.log(err);
           });
+        let path = '/partner';
+        this.props.history.push(path);
       }
     });
-    let path = '/partner';
-    this.props.history.push(path);
-    console.log(this.props.history);
   };
 
   render() {
@@ -99,10 +116,10 @@ class Login extends Component {
             >
               Đăng nhập
             </Button>
-            &nbsp; Bạn chưa có tài khoản{' '}
+            {/* &nbsp; Bạn chưa có tài khoản{' '}
             <Link to="/register" className="FormField__Link">
               Đăng ký
-            </Link>
+            </Link> */}
           </FormItem>
         </Form>
       </LoginWrapper>

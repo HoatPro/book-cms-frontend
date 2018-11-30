@@ -26,10 +26,14 @@ const AddbookUIStyle = styled.div`
     float: left;
     width: 50%;
   }
+
   .ant-form-item-required {
     float: left;
     font-size: 16px;
   }
+  /* .ant-select-selection {
+    background-color: #40a9ff;
+  } */
   .tooltip {
     font-size: 14px;
   }
@@ -53,7 +57,7 @@ const AddbookUIStyle = styled.div`
   }
   .dropdown-action {
     margin-left: 90px;
-    margin-bottom:20px;
+    margin-bottom: 20px;
     margin-top: 8px;
     height: 35px;
   }

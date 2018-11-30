@@ -5,13 +5,10 @@ import TableBook from './TableBook';
 import TableSynthesis from './TableSynthesis';
 import axios from 'axios';
 import { Breadcrumb, Form, Input, Select, Button, Modal, message } from 'antd';
-import { visible } from 'ansi-colors';
 const FormItem = Form.Item;
 const Option = Select.Option;
 const confirm = Modal.confirm;
-function handleChange(value) {
-  console.log(`selected ${value}`);
-}
+
 class EditBook extends React.Component {
   state = {
     confirmDirty: false,
@@ -23,10 +20,14 @@ class EditBook extends React.Component {
     dataCategory: [],
     dataAuthor: [],
   };
-
-  async componentWillMount() {
+  getBookId = () => {
     const slug = this.props.match.params.slug;
-    const bookId = slug.substring(slug.length - 24);
+    const start = slug.lastIndexOf('-') + 1;
+    const bookId = slug.slice(start);
+    return bookId;
+  };
+  async componentWillMount() {
+    const bookId = this.getBookId();
     //get Data category
     axios({
       method: 'GET',
@@ -66,7 +67,6 @@ class EditBook extends React.Component {
         status: infoBook.status.name,
       });
     });
-
     //get data chapter
     axios({
       method: 'GET',
@@ -81,7 +81,6 @@ class EditBook extends React.Component {
       }
     });
   }
-
   convertChapters = () => {
     const { chapters } = this.state;
     const objChapters = {};
@@ -123,7 +122,6 @@ class EditBook extends React.Component {
       status,
       data: { data },
     } = await axios(options);
-
     if (status) {
       message.success('Chỉnh sửa và lưu thành công !');
     }
@@ -140,8 +138,7 @@ class EditBook extends React.Component {
 
   // Chuẩn hóa
   info = () => {
-    const slug = this.props.match.params.slug;
-    const bookId = slug.substring(slug.length - 24);
+    const bookId = this.getBookId();
     confirm({
       title: 'Bạn có muốn chuẩn hóa hay không?',
       content: (
@@ -169,10 +166,7 @@ class EditBook extends React.Component {
 
   render() {
     const { getFieldDecorator } = this.props.form;
-
-    const slug = this.props.match.params.slug;
-    const bookId = slug.substring(slug.length - 24);
-
+    const bookId = this.getBookId();
     // const { data } = this.state;
     const formItemLayout = {
       labelCol: {

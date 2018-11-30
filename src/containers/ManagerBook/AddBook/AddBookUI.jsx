@@ -61,15 +61,8 @@ class AddBookUI extends React.Component {
         key: 'title',
         width: '80%',
       },
-      // {
-      //   title: 'Nội dung',
-      //   dataIndex: 'content',
-      //   key: 'content',
-      //   width: '30%',
-      // },
       {
         title: 'Lựa chọn',
-        // dataIndex: 'operation',
         key: 'operation',
         width: '20%',
         render: (text, record) => {
@@ -240,12 +233,10 @@ class AddBookUI extends React.Component {
   };
   handleSaveAdd = () => {
     const { chapters } = this.state;
-
     this.props.form.validateFields((err, fieldsValue) => {
       if (err) {
         console.log(err);
       }
-
       //kiểm tra
       if (chapters.length < 1) {
         const newData = {
@@ -293,17 +284,13 @@ class AddBookUI extends React.Component {
   handleSave = () => {
     const { keyModal, chapters } = this.state;
     this.props.form.validateFields((err, fieldsValue) => {
-      let values = [
-        fieldsValue['modalTitleEdit'],
-        fieldsValue['modalContentEdit'],
-      ];
       this.setState({
         chapters: chapters.map(item => {
           if (item.orderNo !== keyModal) return item;
           return {
             ...item,
-            title: values[0],
-            content: values[1],
+            title: fieldsValue['modalTitleEdit'],
+            content: fieldsValue['modalContentEdit'],
           };
         }),
         editVisible: false,
@@ -321,26 +308,24 @@ class AddBookUI extends React.Component {
   //Lựa chọn xóa nhiều chương
   handleDeleteAll = () => {
     const lastIndex = dataSelected.length - 1;
-    const obj = dataSelected[lastIndex];
-    console.log(obj);
+    const selected = dataSelected[lastIndex];
     const { chapters } = this.state;
-    let array = [...chapters];
-    const a = [];
+    let chaptersNew = [...chapters];
+    const arrayIndex = [];
     chapters.map((chapter, index) => {
-      obj.map(ob => {
-        if (ob === chapter.orderNo) {
-          a.push(index);
+      selected.map(select => {
+        if (select === chapter.orderNo) {
+          arrayIndex.push(index);
         }
       });
     });
-    console.log(a);
-    a.map(a1 => {
-      array.splice(a1, 1);
+    //Xóa các phần tử đã lựa chọn
+    for (let i = arrayIndex.length - 1; i >= 0; i--) {
+      chaptersNew.splice(arrayIndex[i], 1);
+    }
+    this.setState({
+      chapters: chaptersNew,
     });
-    console.log(array);
-    // this.setState({
-    //   chapters: array,
-    // });
   };
   //Function click button Upload ,change TableUploadBook ,disable button 'Thêm chương' with dataUpload callback is text
   handleClickTable = () => {
@@ -353,6 +338,8 @@ class AddBookUI extends React.Component {
   //API upload book
 
   render() {
+    const { chapters } = this.state;
+    console.log([...chapters]);
     const { disableButton, disaleButtonAdd, showTable1 } = this.state;
     const props = {
       name: 'file',

@@ -10,10 +10,10 @@ import {
   Modal,
   message,
 } from 'antd';
-import { ManagerCategoryWrapper } from './ManagerCategory.style';
-import ModalAddCategory from './ModalAddCategory';
 import reqwest from 'reqwest';
 import axios from 'axios';
+import { ManagerCategoryWrapper } from './ManagerCategory.style';
+import ModalAddCategory from './ModalAddCategory';
 
 const FormItem = Form.Item;
 const { TextArea } = Input;
@@ -32,8 +32,7 @@ class ManagerCategory extends React.Component {
       keyword: '',
     };
   }
-
-  //Thay đổi trang
+  //Function change data table when change pagination
   handleTableChange = (pagination, filter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
@@ -48,6 +47,7 @@ class ManagerCategory extends React.Component {
       ...filter,
     });
   };
+  //API get data the first
   async componentDidMount() {
     axios({
       method: 'GET',
@@ -73,6 +73,7 @@ class ManagerCategory extends React.Component {
       });
     });
   }
+  //API get data table
   callApi = (params = {}) => {
     this.setState({ loading: true });
     reqwest({
@@ -109,7 +110,7 @@ class ManagerCategory extends React.Component {
       });
     });
   };
-  //chuẩn hóa keyword
+  //Function normalization keyword
   standardized = string => {
     let str = string.replace(
       /[^0-9a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ\s]/gi,
@@ -117,7 +118,7 @@ class ManagerCategory extends React.Component {
     );
     return str.charAt(0).toUpperCase() + str.slice(1);
   };
-  //Tìm kiếm thể loại
+  //Function search category
   onSearch = keyword => {
     let keywordUp = this.standardized(keyword);
     this.setState({ keyword: keywordUp });
@@ -137,21 +138,25 @@ class ManagerCategory extends React.Component {
         const dataObj = {};
         const dataTable = dataCategory.map((data, index) => {
           dataObj[data.id] = data;
-          return { ...data, key: data.id, index: index + 1 };
+          return {
+            ...data,
+            key: data.id,
+            index: index + 1,
+          };
         });
         this.setState({ dataTable: dataTable, pagination, dataObj });
       }
     });
   };
 
-  //Thêm thể loại
+  //Add category
   showModalAdd = () => {
     this.setState({ visibleAdd: true });
   };
   closeModal = visible => {
     this.setState({ visibleAdd: visible });
   };
-  //Sửa thể loại
+  //Edit category
   handleEdit = key => {
     const { dataObj } = this.state;
     this.props.form.setFieldsValue({
@@ -165,11 +170,12 @@ class ManagerCategory extends React.Component {
   };
   handleSaveEdit = () => {
     const { keyEdit } = this.state;
+    const categoryId = keyEdit;
     this.props.form.validateFields((err, fieldsValue) => {
       if (!err) {
         axios({
           method: 'PUT',
-          url: `http://localhost:8080/api/v1/categories/${keyEdit}`,
+          url: `http://localhost:8080/api/v1/categories/${categoryId}`,
           headers: {
             'Content-Type': 'application/json',
           },
@@ -203,9 +209,9 @@ class ManagerCategory extends React.Component {
       }
     });
   };
+  //Function update data  table convert
   updateDataObj = () => {
     const { dataTable } = this.state;
-    console.log(dataTable);
     const dataObj = {};
     dataTable.map(data => {
       dataObj[data.id] = data;
@@ -217,7 +223,7 @@ class ManagerCategory extends React.Component {
   handleCancel = () => {
     this.setState({ visibleEdit: false });
   };
-  //Xóa thể loại
+  //Function delete category
   handleDelete = key => {
     const { dataObj } = this.state;
     const categoryId = dataObj[key].id;
@@ -321,12 +327,14 @@ class ManagerCategory extends React.Component {
               rowKey={record => record.id}
             />
           </div>
+          {/* Modal add category */}
           <div className="modal-add">
             <ModalAddCategory
               visible={this.state.visibleAdd}
               closeModal={this.closeModal}
             />
           </div>
+          {/* Modal edit category */}
           <div className="modal-edit">
             <Modal
               visible={this.state.visibleEdit}

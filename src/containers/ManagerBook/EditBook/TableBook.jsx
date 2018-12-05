@@ -9,14 +9,14 @@ import {
   Select,
   message,
 } from 'antd';
-
+import axios from 'axios';
 import { EditBookWapper } from './EditBook.style';
 import ModalNormalization from './ModalNormalization';
-import axios from 'axios';
+
 const { TextArea } = Input;
 const Option = Select.Option;
 const FormItem = Form.Item;
-//lấy chỉ số select bảng
+//get data selected element table
 const dataSelected = [];
 const rowSelection = {
   onChange: selectedRows => {
@@ -37,9 +37,10 @@ class TableBook extends React.Component {
       chapters: [],
       keyModal: null,
       loading: false,
-    }; // visible modal Edit
+    };
   }
-  componentDidMount() {
+  //API get data chapters
+  async componentDidMount() {
     const { bookId } = this.props;
     axios({
       method: 'GET',
@@ -63,7 +64,7 @@ class TableBook extends React.Component {
       }
     });
   }
-
+  //Function convert data chapter
   convertChapters = () => {
     const { chapters } = this.state;
     const objChapters = {};
@@ -72,9 +73,9 @@ class TableBook extends React.Component {
     });
     this.setState({ objChapters });
   };
-  //Xóa 1 phần tử
+  //Function Delete one chapter
   handleDelete = key => {
-    //key chính là chapterID
+    //key is chapterID
     //const {chapterId}=key
     const { bookId } = this.props;
     axios({
@@ -94,7 +95,7 @@ class TableBook extends React.Component {
       }
     });
   };
-  // Xóa lựa chọn nhiều
+  //Function delete chapters
   handleDeleteChapters = () => {
     const { dataTable } = this.state;
     const dataNew = [...dataTable];
@@ -129,8 +130,7 @@ class TableBook extends React.Component {
       }
     });
   };
-  // Thêm chương trong Detail Book
-
+  // Function cancel
   handleCancel = () => {
     this.setState({
       editVisible: false,
@@ -138,7 +138,7 @@ class TableBook extends React.Component {
       visibleAddChapter: false,
     });
   };
-
+  //Function add chapter
   handleAddChapter = visibleAddChapter => {
     this.props.form.setFieldsValue({
       modalTitleAdd: '',
@@ -151,6 +151,7 @@ class TableBook extends React.Component {
   handleSaveAddChapter = () => {
     const { bookId } = this.props;
     const { dataTable } = this.state;
+    //Case table have data
     if (dataTable.length > 0) {
       const lastIndex = dataTable.length - 1;
       const chapterOrderNo = dataTable[lastIndex].orderNo;
@@ -183,7 +184,9 @@ class TableBook extends React.Component {
           });
         }
       });
-    } else {
+    }
+    //Case add new chapter
+    else {
       this.setState({ loading: true });
       this.props.form.validateFields((err, fieldsValue) => {
         if (!err) {
@@ -215,23 +218,28 @@ class TableBook extends React.Component {
       });
     }
   };
-  // Hiện modal Edit
 
   // handleSynthensis = () => {
   //   console.log('Quản lý tổng hợp');
   // };
+  //Function edit chapter
   handleEdit = key => {
     const { objChapters } = this.state;
     this.props.form.setFieldsValue({
       modalTitleEdit: objChapters[key].title,
       modalContentEdit: objChapters[key].content,
     });
-    this.setState({ editVisible: true, keyModal: key, loading: true });
+    this.setState({
+      editVisible: true,
+      keyModal: key,
+      loading: true,
+    });
   };
   handleSave = () => {
-    const { keyModal, objChapters } = this.state;
+    const { keyModal } = this.state;
     const { bookId } = this.props;
-    const chapterId = objChapters[keyModal].id;
+    //keyModal is chapterId
+    let chapterId = keyModal;
     this.props.form.validateFields((err, fieldsValue) => {
       if (!err) {
         axios({
@@ -247,45 +255,48 @@ class TableBook extends React.Component {
           },
         }).then(res => {
           if (res.status) {
-            const { dataTable } = this.state;
+            const { dataTable, chapters } = this.state;
             message.success('Sửa chương thành công !!');
-            setTimeout(() => {
-              this.setState(
-                {
-                  editVisible: false,
-                  dataTable: dataTable.map(item => {
-                    if (item.key !== keyModal) return item;
-                    return {
-                      ...item,
-                      title: fieldsValue['modalTitleEdit'],
-                      content: fieldsValue['modalContentEdit'],
-                    };
-                  }),
-                  loading: false,
-                },
-                function() {
-                  this.updateObjChapters();
-                },
-              );
-            }, 200);
+            this.setState(
+              {
+                editVisible: false,
+                dataTable: dataTable.map(item => {
+                  if (item.key !== keyModal) return item;
+                  return {
+                    ...item,
+                    title: fieldsValue['modalTitleEdit'],
+                    content: fieldsValue['modalContentEdit'],
+                  };
+                }),
+                loading: false,
+                chapters: chapters.map(chapter => {
+                  if (chapter.id !== keyModal) return chapter;
+                  return {
+                    ...chapter,
+                    title: fieldsValue['modalTitleEdit'],
+                    content: fieldsValue['modalContentEdit'],
+                  };
+                }),
+              },
+              function() {
+                this.updateObjChapters();
+              },
+            );
           }
         });
       }
     });
   };
-
+  //Function update data chapter convert
   updateObjChapters = () => {
-    const { dataTable } = this.state;
+    const { chapters } = this.state;
     const objChapters = {};
-    dataTable.map(data => {
-      objChapters[data.key] = data;
+    chapters.forEach(chapter => {
+      objChapters[chapter.id] = chapter;
     });
-    this.setState({
-      objChapters: objChapters,
-    });
+    this.setState({ objChapters: objChapters });
   };
-
-  // Modal Chuẩn hóa
+  // Modal Normalization
   setNormalizationVisible = key => {
     const { objChapters } = this.state;
     this.setState({
@@ -344,7 +355,6 @@ class TableBook extends React.Component {
     const { getFieldDecorator } = this.props.form;
     return (
       <EditBookWapper>
-        {/* Bảng thông tin chapter và lựa chọn hành động cho bảng */}
         <Select
           className="selectact"
           showSearch
@@ -373,7 +383,7 @@ class TableBook extends React.Component {
             rowKey={record => record.key}
           />
         </div>
-        {/* Modal Add  chương */}
+        {/* Modal Add  chapter */}
         <div className="modal-add-chapter">
           <Modal
             visible={this.state.visibleAddChapter}
@@ -386,14 +396,7 @@ class TableBook extends React.Component {
           >
             <Form layout="vertical">
               <FormItem label="Tiêu đề">
-                {getFieldDecorator('modalTitleAdd', {
-                  rules: [
-                    {
-                      required: false,
-                      message: 'Tên tiêu đề không được để trống!!',
-                    },
-                  ],
-                })(<Input />)}
+                {getFieldDecorator('modalTitleAdd')(<Input />)}
               </FormItem>
               <FormItem label="Nội dung">
                 {getFieldDecorator('modalContentAdd')(<TextArea rows={16} />)}
@@ -401,7 +404,7 @@ class TableBook extends React.Component {
             </Form>
           </Modal>
         </div>
-        {/* Modal Edit chương */}
+        {/* Modal Edit chapter */}
         <Modal
           visible={this.state.editVisible}
           title="Sửa chương"
@@ -413,21 +416,14 @@ class TableBook extends React.Component {
         >
           <Form layout="vertical">
             <FormItem label="Tiêu đề">
-              {getFieldDecorator('modalTitleEdit', {
-                rules: [
-                  {
-                    required: false,
-                    message: 'Tên tiêu đề không được để trống!!',
-                  },
-                ],
-              })(<Input />)}
+              {getFieldDecorator('modalTitleEdit')(<Input />)}
             </FormItem>
             <FormItem label="Nội dung">
               {getFieldDecorator('modalContentEdit')(<TextArea rows={16} />)}
             </FormItem>
           </Form>
         </Modal>
-        {/* Modal chuẩn hóa nội dung */}
+        {/* Modal normalization content */}
         <div className="modal-normalization">
           <ModalNormalization
             visible={this.state.visibleNormalization}

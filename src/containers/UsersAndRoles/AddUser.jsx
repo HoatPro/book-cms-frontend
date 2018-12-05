@@ -10,9 +10,10 @@ import {
   Row,
   Col,
 } from 'antd';
-import { UsersRolesWrapper } from './UsersRoles.style';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { UsersRolesWrapper } from './UsersRoles.style';
+
 const FormItem = Form.Item;
 
 class AddUser extends React.Component {
@@ -26,6 +27,7 @@ class AddUser extends React.Component {
       disableEditor: false,
     };
   }
+  //API get data Roles
   componentDidMount() {
     axios({
       method: 'GET',
@@ -45,6 +47,7 @@ class AddUser extends React.Component {
       }
     });
   }
+  //Function get roleId
   convertCheckedToId = string => {
     const { dataRoles } = this.state;
     const listId = [];
@@ -55,6 +58,7 @@ class AddUser extends React.Component {
     });
     return listId;
   };
+  //Function change select
   onChange = checkedList => {
     if (checkedList.length === 0) {
       this.setState({
@@ -89,6 +93,8 @@ class AddUser extends React.Component {
       });
     }
   };
+
+  //Function check first name or last name
   checkCondition = (a, b) => {
     if (typeof a !== 'undefined' && typeof b !== 'undefined') {
       return a + ` ` + b;
@@ -100,6 +106,7 @@ class AddUser extends React.Component {
       return '';
     }
   };
+  //Function save change role of user
   handleSubmit = e => {
     const { listRoles } = this.state;
     e.preventDefault();
@@ -197,6 +204,7 @@ class AddUser extends React.Component {
                   },
                 ],
               })(
+                //Checkbox group
                 <Checkbox.Group
                   style={{ width: '100%' }}
                   onChange={this.onChange}

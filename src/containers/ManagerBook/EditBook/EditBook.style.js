@@ -13,6 +13,11 @@ const EditBookWapper = styled.div`
     color: black;
     font-weight: 600;
   }
+  .ant-breadcrumb span:hover {
+    font-size: 18px;
+    color: #40a9ff;
+    font-weight: 600;
+  }
   h3 {
     margin-top: 30px;
   }
@@ -22,17 +27,18 @@ const EditBookWapper = styled.div`
   .ant-form.ant-form-horizontal {
     border: 1px solid #ddd;
     margin-top: 30px;
-    width: 90%;
-    height: 700px;
+    width: 91%;
+    height: 720px;
     padding-left: 100px;
     margin-left: 60px;
   }
   .btn-submit {
-    float: left;
-    margin-top: 170px;
-    margin-left: 170px;
-    width: 100px;
+    margin-top: 150px;
+    margin-left: 230px;
+    width: 120px;
     font-size: 16px;
+    height:34px;
+
   }
   .ant-form-item-label.ant-col-xs-24.ant-col-sm-18 label {
     float: left;
@@ -67,18 +73,18 @@ const EditBookWapper = styled.div`
   }
 
   .audio {
-    margin-left: 50px;
+    margin-left: 60px;
     width: 600px;
     margin-top: 20px;
     margin-bottom: 15px;
     float: left;
   }
   .selectaudio {
-    margin-left: 200px;
+    margin-left: 195px;
     margin-top: 25px;
   }
   .selectact {
-    margin-left: 56px;
+    margin-left: 60px;
     margin-top: 15px;
     margin-bottom: 15px;
     color: #40a9ff;
@@ -87,13 +93,16 @@ const EditBookWapper = styled.div`
   .modalinput {
     margin-top: 20px;
   }
-
+.table-chapter{
+  margin-left:5px;
+  margin-right:-2px;
+}
   .allbook h4 {
     margin-top: 25px;
   }
 
   .delete {
-    margin-left: 30px;
+    margin-left: 60px;
     margin-bottom: 20px;
     font-family: Arial;
   }
@@ -111,11 +120,11 @@ const EditBookWapper = styled.div`
   } */
 
   .allbook {
-    width: 95%;
+    width: 91%;
     height: 600px;
     margin-top: 35px;
     font-family: Arial;
-    margin-left: 30px;
+    margin-left: 60px;
   }
   .allbook h3 {
     font-weight: bold;

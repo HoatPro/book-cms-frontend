@@ -33,7 +33,7 @@ class ManagerAuthor extends React.Component {
     };
   }
 
-  //thay đổi trang
+  //Function change data table when change pagination
   handleTableChange = (pagination, filters) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
@@ -47,31 +47,37 @@ class ManagerAuthor extends React.Component {
       ...filters,
     });
   };
+  // API get the first data table
   async componentDidMount() {
     axios({
       method: 'GET',
       url: `http://localhost:8080/api/v1/authors?size=10`,
       withCredentials: true,
-    }).then(res => {
-      const pagination = { ...this.state.pagination };
-      pagination.total = 10 * res.data.results.totalPages;
-      const dataAuthor = res.data.results.items;
-      const dataObj = {};
-      const dataTable = dataAuthor.map((data, index) => {
-        dataObj[data.id] = data;
-        return {
-          ...data,
-          key: data.id,
-          index: index + 1,
-        };
+    })
+      .then(res => {
+        const pagination = { ...this.state.pagination };
+        pagination.total = 10 * res.data.results.totalPages;
+        const dataAuthor = res.data.results.items;
+        const dataObj = {};
+        const dataTable = dataAuthor.map((data, index) => {
+          dataObj[data.id] = data;
+          return {
+            ...data,
+            key: data.id,
+            index: index + 1,
+          };
+        });
+        this.setState({
+          dataTable: dataTable,
+          dataObj,
+          pagination,
+        });
+      })
+      .catch(err => {
+        message.error('Lỗi kết nối : ' + err);
       });
-      this.setState({
-        dataTable: dataTable,
-        dataObj,
-        pagination,
-      });
-    });
   }
+  // API get data table
   callApi = (params = {}) => {
     this.setState({ loading: true });
     reqwest({
@@ -83,32 +89,36 @@ class ManagerAuthor extends React.Component {
         ...params,
       },
       type: 'json',
-    }).then(data => {
-      const pagination = { ...this.state.pagination };
-      // Read total count from server
-      const {
-        results: { totalPages, items },
-      } = data;
-      pagination.total = 10 * totalPages;
-      const dataAuthor = items;
-      const dataObj = {};
-      const dataTable = dataAuthor.map((data, index) => {
-        dataObj[data.id] = data;
-        return {
-          ...data,
-          key: data.id,
-          index: index + 1 + (pagination.current - 1) * 10,
-        };
+    })
+      .then(data => {
+        const pagination = { ...this.state.pagination };
+        // Read total count from server
+        const {
+          results: { totalPages, items },
+        } = data;
+        pagination.total = 10 * totalPages;
+        const dataAuthor = items;
+        const dataObj = {};
+        const dataTable = dataAuthor.map((data, index) => {
+          dataObj[data.id] = data;
+          return {
+            ...data,
+            key: data.id,
+            index: index + 1 + (pagination.current - 1) * 10,
+          };
+        });
+        this.setState({
+          loading: false,
+          dataTable: dataTable,
+          pagination,
+          dataObj,
+        });
+      })
+      .catch(err => {
+        message.error('Lỗi kết nối : ' + err);
       });
-      this.setState({
-        loading: false,
-        dataTable: dataTable,
-        pagination,
-        dataObj,
-      });
-    });
   };
-  //Thêm tác giả
+  //Add Author
   showModalAdd = () => {
     this.setState({ visibleAdd: true });
   };
@@ -116,13 +126,9 @@ class ManagerAuthor extends React.Component {
     this.setState({ visibleAdd: visible });
   };
 
-  // Sửa tác giả
+  // Edit Author
   handleEdit = key => {
     const { dataObj } = this.state;
-    // var date = new Date(dataObj[key].birthDate);
-    // var myDate = new Date(date);
-    // console.log(myDate.toLocaleDateString());
-    // const birthDate = myDate.toLocaleDateString();
     this.props.form.setFieldsValue({
       nameEdit: dataObj[key].name,
       birthDateEdit: dataObj[key].birthDate,
@@ -135,11 +141,12 @@ class ManagerAuthor extends React.Component {
   };
   handleSaveEdit = () => {
     const { keyEdit } = this.state;
+    let authorId = keyEdit;
     this.props.form.validateFields((err, fieldsValue) => {
       if (!err) {
         axios({
           method: 'PUT',
-          url: `http://localhost:8080/api/v1/authors/${keyEdit}`,
+          url: `http://localhost:8080/api/v1/authors/${authorId}`,
           headers: {
             'Content-Type': 'application/json',
           },
@@ -149,32 +156,37 @@ class ManagerAuthor extends React.Component {
             birthDate: fieldsValue['birthDateEdit'],
             description: fieldsValue['descriptionEdit'],
           },
-        }).then(res => {
-          if (res.status) {
-            const { dataTable } = this.state;
-            message.success('Sửa tác giả thành công !');
-            this.setState(
-              {
-                visibleEdit: false,
-                dataTable: dataTable.map(item => {
-                  if (item.id !== keyEdit) return item;
-                  return {
-                    ...item,
-                    name: fieldsValue['nameEdit'],
-                    birthDate: fieldsValue['birthDateEdit'],
-                    description: fieldsValue['descriptionEdit'],
-                  };
-                }),
-              },
-              function() {
-                this.updateDataObj();
-              },
-            );
-          }
-        });
+        })
+          .then(res => {
+            if (res.status) {
+              const { dataTable } = this.state;
+              message.success('Sửa tác giả thành công !');
+              this.setState(
+                {
+                  visibleEdit: false,
+                  dataTable: dataTable.map(item => {
+                    if (item.id !== keyEdit) return item;
+                    return {
+                      ...item,
+                      name: fieldsValue['nameEdit'],
+                      birthDate: fieldsValue['birthDateEdit'],
+                      description: fieldsValue['descriptionEdit'],
+                    };
+                  }),
+                },
+                function() {
+                  this.updateDataObj();
+                },
+              );
+            }
+          })
+          .catch(err => {
+            message.warning(' Lỗi  :' + err);
+          });
       }
     });
   };
+  //Update data convert
   updateDataObj = () => {
     const { dataTable } = this.state;
     const dataObj = {};
@@ -188,7 +200,7 @@ class ManagerAuthor extends React.Component {
   handleCancel = () => {
     this.setState({ visibleEdit: false });
   };
-  //Xóa tác giả
+  //Delete author
   handleDelete = key => {
     const { dataObj } = this.state;
     const authorId = dataObj[key].id;
@@ -211,11 +223,11 @@ class ManagerAuthor extends React.Component {
       }
     });
   };
-  //chuẩn hóa keyword
+  //Normalization keyword
   standardized = string => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
-  //Tìm kiếm tác giả
+  //Function find author
   onSearch = keyword => {
     let keywordUp = this.standardized(keyword);
     this.setState({ keyword: keywordUp });

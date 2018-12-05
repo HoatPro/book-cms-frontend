@@ -1,7 +1,8 @@
 import React from 'react';
-import { AddbookUIStyle } from './AddBookUI.style';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { AddbookUIStyle } from './AddBookUI.style';
+
 import {
   Breadcrumb,
   Form,
@@ -20,14 +21,14 @@ import {
   Modal,
 } from 'antd';
 
-// import TableUploadBook from './TableUploadBook';
 //Modal Add and Modal Edit
 
 const { TextArea } = Input;
 const FormItem = Form.Item;
 const Option = Select.Option;
 const { MonthPicker } = DatePicker;
-// rowSelection chọn phần tử trong bảng
+
+// rowSelection  select element in table
 const dataSelected = [];
 const rowSelection = {
   onChange: selectedRows => {
@@ -41,11 +42,11 @@ class AddBookUI extends React.Component {
       autoCompleteResult: [],
       loading: false,
       disableButton: true, // disable button 'Thêm sách'
-      disaleButtonAdd: false, // disable button 'Thêm chương' nếu chọn Upload
-      showTable1: true, // bảng thêm chapter bằng tay
+      disaleButtonAdd: false, // disable button 'Thêm chương' when use Upload Book
+      showTable1: true, // show table add chapter
       addVisible: false, // visible modal Add
       editVisible: false, // visible modal Edit
-      chapters: [], // lưu trữ chapter của bảng
+      chapters: [], // data chapter of table
       // fileName: '',
       keyModal: null,
       dataCategory: [],
@@ -99,112 +100,119 @@ class AddBookUI extends React.Component {
     return columns;
   };
   async componentDidMount() {
-    //API dữ liệu thể loại
+    //API data category
     axios({
       method: 'GET',
       url: `http://localhost:8080/api/v1/categories?fileds=name`,
       withCredentials: true,
-    }).then(res => {
-      const dataCategory = res.data.results.items;
-      this.setState({
-        dataCategory: dataCategory,
+    })
+      .then(res => {
+        const dataCategory = res.data.results.items;
+        this.setState({
+          dataCategory: dataCategory,
+        });
+      })
+      .catch(err => {
+        message.error('Lỗi :' + err);
       });
-    });
 
-    //API dữ liệu tác giả
+    //API data author
     axios({
       method: 'GET',
       url: `http://localhost:8080/api/v1/authors?fileds=name`,
       withCredentials: true,
-    }).then(res => {
-      const dataAuthor = res.data.results.items;
-      this.setState({ dataAuthor: dataAuthor });
-    });
+    })
+      .then(res => {
+        const dataAuthor = res.data.results.items;
+        this.setState({ dataAuthor: dataAuthor });
+      })
+      .catch(err => {
+        message.error('Lỗi :' + err);
+      });
   }
   // Submit form
   handleSubmit = e => {
     e.preventDefault();
     let { chapters } = this.state;
     this.props.form.validateFields((err, fieldsValue) => {
-      if (err) {
-        console.log(err);
-      }
-      //API POST BOOK BY UI
-      chapters = chapters.map(chapter => {
-        return {
-          ...chapter,
-          orderNo: chapter.orderNo,
-        };
-      });
-      if (
-        !fieldsValue['authors'] ||
-        !fieldsValue['categories'] ||
-        !fieldsValue['month_picker']
-      ) {
-        axios({
-          method: 'POST',
-          url: 'http://localhost:8080/api/v1/books/',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-          data: {
-            title: fieldsValue['title'],
-            publishingCompany: fieldsValue['publishingCompany'],
-            translator: fieldsValue['translator'],
-            pageNumber: fieldsValue['pageNumber'],
-            // fileName: fileName,
-            chapters: chapters,
-          },
-        }).then(res => {
-          if (res.status === 200 && res.data.status) {
-            let path = '/manager-book';
-            this.props.history.push(path);
-          } else {
-            alert('Upload sách lỗi');
-          }
-        });
-      } else {
-        const categories = fieldsValue['categories'].map(category => {
-          const start = category.lastIndexOf('-') + 1;
-          const str = category.slice(start);
+      if (!err) {
+        //API POST BOOK BY UI
+        chapters = chapters.map(chapter => {
           return {
-            id: str,
+            ...chapter,
+            orderNo: chapter.orderNo,
           };
         });
-        const authors = fieldsValue['authors'].map(author => {
-          const start = author.lastIndexOf('-') + 1;
-          const str = author.slice(start);
-          return {
-            id: str,
-          };
-        });
-        axios({
-          method: 'POST',
-          url: 'http://localhost:8080/api/v1/books/',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-          data: {
-            title: fieldsValue['title'],
-            publishingCompany: fieldsValue['publishingCompany'],
-            translator: fieldsValue['translator'],
-            categories: categories,
-            authors: authors,
-            publicYear: fieldsValue['month_picker'].format('YYYY'),
-            pageNumber: fieldsValue['pageNumber'],
-            // fileName: fileName,
-            chapters: chapters,
-          },
-        }).then(res => {
-          if (res.status === 200 && res.data.status) {
-            let path = '/manager-book';
-            this.props.history.push(path);
-          } else {
-            alert('Upload sách lỗi');
-          }
-        });
+        //Case no input data author or category or date
+        if (
+          !fieldsValue['authors'] ||
+          !fieldsValue['categories'] ||
+          !fieldsValue['month_picker']
+        ) {
+          axios({
+            method: 'POST',
+            url: 'http://localhost:8080/api/v1/books/',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+            data: {
+              title: fieldsValue['title'],
+              publishingCompany: fieldsValue['publishingCompany'],
+              translator: fieldsValue['translator'],
+              pageNumber: fieldsValue['pageNumber'],
+              // fileName: fileName,
+              chapters: chapters,
+            },
+          }).then(res => {
+            if (res.status === 200 && res.data.status) {
+              let path = '/manager-book';
+              this.props.history.push(path);
+            } else {
+              message.error('Upload sách lỗi');
+            }
+          });
+        } else {
+          const categories = fieldsValue['categories'].map(category => {
+            return {
+              id: category,
+            };
+          });
+          const authors = fieldsValue['authors'].map(author => {
+            const start = author.lastIndexOf('-') + 1;
+            const str = author.slice(start);
+            return {
+              id: str,
+            };
+          });
+          //API post book
+          axios({
+            method: 'POST',
+            url: 'http://localhost:8080/api/v1/books/',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+            data: {
+              title: fieldsValue['title'],
+              publishingCompany: fieldsValue['publishingCompany'],
+              translator: fieldsValue['translator'],
+              categories: categories,
+              authors: authors,
+              publicYear: fieldsValue['month_picker'].format('YYYY'),
+              pageNumber: fieldsValue['pageNumber'],
+              // fileName: fileName,
+              chapters: chapters,
+            },
+          }).then(res => {
+            if (res.status === 200 && res.data.status) {
+              let path = '/manager-book';
+              this.props.history.push(path);
+            } else {
+              message.error('Upload sách lỗi');
+            }
+          });
+        }
       }
     });
   };
@@ -215,12 +223,10 @@ class AddBookUI extends React.Component {
       showTable1: true,
     });
   };
-
   handleCancel = () => {
     this.setState({ addVisible: false, editVisible: false });
   };
-  //Thêm chương bằng UI
-
+  //Add chapter by UI
   handleAdd = addVisible => {
     this.props.form.setFieldsValue({
       modalTitleAdd: '',
@@ -237,7 +243,7 @@ class AddBookUI extends React.Component {
       if (err) {
         console.log(err);
       }
-      //kiểm tra
+      //Test data chapters set orderNo
       if (chapters.length < 1) {
         const newData = {
           title: fieldsValue['modalTitleAdd'],
@@ -267,7 +273,7 @@ class AddBookUI extends React.Component {
     });
   };
 
-  //Sửa chương
+  //Funtion edit chapter add by UI
   setEditVisible(editVisible) {
     this.setState({ editVisible });
   }
@@ -278,12 +284,14 @@ class AddBookUI extends React.Component {
       modalTitleEdit: chapter[0].title,
       modalContentEdit: chapter[0].content,
     });
-
     this.setState({ editVisible: true, keyModal: orderNo });
   };
   handleSave = () => {
     const { keyModal, chapters } = this.state;
     this.props.form.validateFields((err, fieldsValue) => {
+      if (err) {
+        console.log(err);
+      }
       this.setState({
         chapters: chapters.map(item => {
           if (item.orderNo !== keyModal) return item;
@@ -298,14 +306,14 @@ class AddBookUI extends React.Component {
       message.success('Sửa chương thành công !!');
     });
   };
-  //Xóa chương
+  //Delete chapter
   handleDelete = orderNo => {
     const chapters = [...this.state.chapters];
     this.setState({
       chapters: chapters.filter(item => item.orderNo !== orderNo),
     });
   };
-  //Lựa chọn xóa nhiều chương
+  //Delete chapters
   handleDeleteAll = () => {
     const lastIndex = dataSelected.length - 1;
     const selected = dataSelected[lastIndex];
@@ -319,7 +327,6 @@ class AddBookUI extends React.Component {
         }
       });
     });
-    //Xóa các phần tử đã lựa chọn
     for (let i = arrayIndex.length - 1; i >= 0; i--) {
       chaptersNew.splice(arrayIndex[i], 1);
     }
@@ -335,12 +342,11 @@ class AddBookUI extends React.Component {
       disaleButtonAdd: true,
     });
   };
-  //API upload book
-
   render() {
     const { chapters } = this.state;
-    console.log([...chapters]);
+    console.log(chapters);
     const { disableButton, disaleButtonAdd, showTable1 } = this.state;
+    //API upload book with file have chapters
     const props = {
       name: 'file',
       multiple: true,
@@ -392,7 +398,6 @@ class AddBookUI extends React.Component {
         }
       },
     };
-
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
       labelCol: {
@@ -425,15 +430,13 @@ class AddBookUI extends React.Component {
         </Menu.Item>
       </Menu>
     );
+    //data select category
     const { dataCategory } = this.state;
     const selectCategory = [];
     dataCategory.map(data => {
-      selectCategory.push(
-        <Option key={data.id} value={data.slug}>
-          {data.name}
-        </Option>,
-      );
+      selectCategory.push(<Option key={data.id}>{data.name}</Option>);
     });
+    //data select author
     const { dataAuthor } = this.state;
     const selectAuthor = [];
     dataAuthor.map(data => {
@@ -453,27 +456,21 @@ class AddBookUI extends React.Component {
             <Link to="/addbookui">Thêm sách bằng giao diện</Link>
           </Breadcrumb.Item>
         </Breadcrumb>
-        <Form chapters={this.state.chapters}>
+        <Form chapters={this.state.chapters} onSubmit={this.handleSubmit}>
           <div className="form_add_infobook">
             <FormItem {...formItemLayout} label="Tên sách">
               {getFieldDecorator('title', {
                 rules: [
                   {
                     required: true,
-                    message: 'Khi thêm sách, tên sách không được để trống!',
+                    message:
+                      'Trước khi thêm sách, tên sách không được để trống!',
                   },
                 ],
               })(<Input />)}
             </FormItem>
             <FormItem {...formItemLayout} label="Nhà xuất bản">
-              {getFieldDecorator('publishingCompany', {
-                rules: [
-                  {
-                    required: false,
-                    message: 'Điền tên nhà xuất bản sách!',
-                  },
-                ],
-              })(<Input />)}
+              {getFieldDecorator('publishingCompany')(<Input />)}
             </FormItem>
 
             <FormItem {...formItemLayout} label="Năm xuất bản">
@@ -481,7 +478,6 @@ class AddBookUI extends React.Component {
                 rules: [
                   {
                     type: 'object',
-                    required: false,
                     message: 'Chọn năm tháng xuất bản !',
                   },
                 ],
@@ -494,14 +490,7 @@ class AddBookUI extends React.Component {
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="Người dịch">
-              {getFieldDecorator('translator', {
-                rules: [
-                  {
-                    required: false,
-                    message: 'Điền tên người dịch !',
-                  },
-                ],
-              })(<Input />)}
+              {getFieldDecorator('translator')(<Input />)}
             </FormItem>
             <FormItem
               {...formItemLayout}
@@ -517,28 +506,20 @@ class AddBookUI extends React.Component {
                 </span>
               }
             >
-              {getFieldDecorator('authors', {
-                rules: [
-                  {
-                    required: false,
-                    message: 'Điền tên tác giả của sách!',
-                  },
-                ],
-              })(
-                <Select mode="tags" placeholder="Tên tác giả" allowClear={true}>
+              {getFieldDecorator('authors')(
+                <Select
+                  mode="tags"
+                  placeholder="Chọn tác giả"
+                  allowClear={true}
+                >
                   {selectAuthor}
                 </Select>,
               )}
             </FormItem>
             <FormItem {...formItemLayout} label="Số trang">
-              {getFieldDecorator('pageNumber', {
-                rules: [
-                  {
-                    required: false,
-                    message: 'Số trang sách hiện tại.',
-                  },
-                ],
-              })(<InputNumber className="number_page" />)}
+              {getFieldDecorator('pageNumber')(
+                <InputNumber className="number_page" />,
+              )}
             </FormItem>
             <FormItem
               {...formItemLayout}
@@ -554,18 +535,18 @@ class AddBookUI extends React.Component {
                 </span>
               }
             >
-              {getFieldDecorator('categories', {
-                rules: [
-                  {
-                    required: false,
-                    message: 'Điền thể loại sách !',
-                  },
-                ],
-              })(
+              {getFieldDecorator('categories')(
                 <Select
+                  showSearch
                   mode="multiple"
                   placeholder="Chọn thể loại"
                   allowClear={true}
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.props.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  }
                 >
                   {selectCategory}
                 </Select>,
@@ -651,7 +632,7 @@ class AddBookUI extends React.Component {
           <Button
             className="addbook"
             type="primary"
-            onClick={this.handleSubmit}
+            htmlType="submit"
             disabled={disableButton}
           >
             Thêm sách

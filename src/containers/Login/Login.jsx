@@ -47,20 +47,21 @@ class Login extends Component {
               document.cookie =
                 ' accessToken' + '=' + access_token + ';' + ';path=/';
             }
-            // window.location.reload();
           })
           .catch(err => {
             console.log(err);
           });
         let path = '/partner';
         this.props.history.push(path);
+        console.log(values);
+        this.setState({
+          dataUser: values.email,
+        });
       }
     });
   };
-
   render() {
     const { getFieldDecorator } = this.props.form;
-
     return (
       <LoginWrapper>
         <Form onSubmit={this.handleSubmit} className="login-form">
@@ -109,6 +110,7 @@ class Login extends Component {
               Quên mật khẩu
             </a>
             <br />
+
             <Button
               type="primary"
               htmlType="submit"

@@ -15,30 +15,37 @@ const ModalAddCategory = Form.create()(
     handleCreate = () => {
       const { visible } = this.props;
       this.props.form.validateFields((err, values) => {
-        if (err) {
-          return;
-        }
-        axios({
-          method: 'POST',
-          url: `http://localhost:8080/api/v1/categories`,
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: {
-            name: values.name,
-            description: values.description,
-          },
-        })
-          .then(res => {
-            message.success('Thêm thể loại thành công');
-            window.location.reload();
+        if (!err) {
+          axios({
+            method: 'POST',
+            url: `http://localhost:8080/api/v1/categories`,
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: {
+              name: values.name,
+              description: values.description,
+            },
           })
-          .catch(err => {
-            message.warning('Thêm thể loại lỗi ' + err);
-          });
+            .then(res => {
+              if (res.status) {
+                if (res.data.status === 0) {
+                  message.warning(
+                    'Tên thể loại đã có ,vui lòng thêm thể loại khác !',
+                  );
+                } else {
+                  message.success('Thêm thể loại thành công');
+                  window.location.reload();
+                }
+              }
+            })
+            .catch(err => {
+              message.error('Thêm thể loại lỗi :' + err);
+            });
+          this.props.closeModal(!visible);
+        }
       });
-      this.props.closeModal(!visible);
     };
     render() {
       const { visible } = this.props;

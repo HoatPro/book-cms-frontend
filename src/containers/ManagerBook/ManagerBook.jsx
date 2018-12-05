@@ -1,12 +1,12 @@
 import React from 'react';
 import { Icon, Input, Button, Table, Select, Dropdown, Menu } from 'antd';
-import { ManagerBookWrapper } from './ManagerBook.style';
 import { Link } from 'react-router-dom';
 import reqwest from 'reqwest';
 import axios from 'axios';
+import { ManagerBookWrapper } from './ManagerBook.style';
 const Search = Input.Search;
 const Option = Select.Option;
-// const fields = 'title,createdBy,publicYear,categories,authors';
+// Function get selected element data in table
 const rowSelection = {
   onChange: (selectedRowKeys, selectedRows) => {
     console.log(`selectedRowKeys: ${selectedRowKeys}`, selectedRows[0]);
@@ -25,7 +25,7 @@ class ManagerBook extends React.Component {
       keyword: '',
     };
   }
-
+  //API get data table
   callApi = (params = {}) => {
     this.setState({ loading: true });
     reqwest({
@@ -52,6 +52,7 @@ class ManagerBook extends React.Component {
   componentDidMount() {
     this.callApi();
   }
+  //Function change data table when change pagination
   handleTableChange = (pagination, filters, sorter) => {
     const pager = { ...this.state.pagination };
     pager.current = pagination.current;
@@ -75,18 +76,11 @@ class ManagerBook extends React.Component {
     }
   };
 
-  // handleClick = () => {
-  //   const { data } = this.state;
-  //   console.log(data);
-  //   let path = `/edit/${data.results.id}`;
-  //   this.props.history.push(path);
-  //   console.log(this.props.history);
-  // };
-  //chuẩn hóa keyword
+  //Function normalization keyword
   standardized = string => {
     return string.charAt(0).toUpperCase() + string.slice(1);
   };
-  // Tìm kiếm
+  // Function search
   onSearch = keyword => {
     let keywordUp = this.standardized(keyword);
     this.setState({ keyword: keywordUp });

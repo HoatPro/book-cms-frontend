@@ -26,6 +26,9 @@ class DashBoard extends React.Component {
     console.log(this.props.match.params);
     console.log(nextProps);
   }
+  componentDidMount() {
+    console.log(this.props);
+  }
   render() {
     console.log(this.props.match.params);
     const data1 = [

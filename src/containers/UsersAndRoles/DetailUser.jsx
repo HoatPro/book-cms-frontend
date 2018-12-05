@@ -11,9 +11,9 @@ import {
   Modal,
   message,
 } from 'antd';
-
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+
 const confirm = Modal.confirm;
 
 class DetailUser extends React.Component {
@@ -26,11 +26,16 @@ class DetailUser extends React.Component {
       dataUser: [],
       features: [],
       checkedList: [],
+      disableLegal: true,
       disableAdmin: false,
       disableManager: false,
       disableEditor: false,
+      getIdRole: [],
+      disableButtonSave: false,
+      disableButtonDelete: false,
     };
   }
+  //API get info detail user
   componentDidMount() {
     const userId = this.props.match.params.userId;
     axios({
@@ -41,35 +46,67 @@ class DetailUser extends React.Component {
       if (res.status) {
         const dataUser = res.data.results;
         const roles = dataUser.roles;
-        const features = roles[0].features;
-        const roleName = roles[0].name;
-        if (roleName === 'Admin') {
+        //Case user is Legal , roles of Legal have field isOwner
+        // Legal have role Admin
+        if (roles.length > 1 || roles.isOwner) {
+          const checkList = [];
+          const features = [];
+          roles.map(role => checkList.push(role.name));
+          roles.map(role => {
+            if (role.features) {
+              features.push(role.features);
+            } else return;
+          });
           this.setState({
-            disableAdmin: false,
+            dataUser: dataUser,
+            disableLegal: true,
+            disableAdmin: true,
             disableManager: true,
             disableEditor: true,
-          });
-        } else if (roleName === 'Manager') {
-          this.setState({
-            disableAdmin: false,
-            disableManager: false,
-            disableEditor: true,
-          });
-        } else {
-          this.setState({
-            disableAdmin: false,
-            disableManager: false,
-            disableEditor: false,
+            features: features[1],
+            checkedList: checkList,
+            disableButtonSave: true,
+            disableButtonDelete: true,
           });
         }
-        const defaultCheckedList = [`${roleName}`];
-        this.setState({
-          dataUser: dataUser,
-          features: features,
-          checkedList: defaultCheckedList,
-        });
+        //Case user is not Legal
+        else {
+          const features = roles[0].features;
+          const roleName = roles[0].name;
+          const getIdRole = roles[0].id;
+          if (roleName === 'Admin') {
+            this.setState({
+              disableAdmin: false,
+              disableManager: true,
+              disableEditor: true,
+              getIdRole: getIdRole,
+            });
+          } else if (roleName === 'Manager') {
+            this.setState({
+              disableAdmin: false,
+              disableManager: false,
+              disableEditor: true,
+              getIdRole: getIdRole,
+            });
+          } else {
+            this.setState({
+              disableAdmin: false,
+              disableManager: false,
+              disableEditor: false,
+              getIdRole: getIdRole,
+            });
+          }
+          const defaultCheckedList = [`${roleName}`];
+          this.setState({
+            dataUser: dataUser,
+            features: features,
+            checkedList: defaultCheckedList,
+            getIdRole: getIdRole,
+          });
+        }
       }
     });
+    //API get data Role
     axios({
       method: 'GET',
       url: `http://localhost:8080/api/v1/roles`,
@@ -81,6 +118,7 @@ class DetailUser extends React.Component {
       });
     });
   }
+  //Function delete user
   handleDelete = () => {
     const userId = this.props.match.params.userId;
     confirm({
@@ -105,8 +143,6 @@ class DetailUser extends React.Component {
         }).then(response => {
           if (response.status) {
             message.success('Xóa người dùng thành công');
-            let path = `/user-role`;
-            this.props.history.push(path);
           }
         });
       },
@@ -115,7 +151,7 @@ class DetailUser extends React.Component {
       },
     });
   };
-
+  //Function change color when change component Info user or Role user
   handleRole = () => {
     this.setState({
       showUserInfo: false,
@@ -131,7 +167,8 @@ class DetailUser extends React.Component {
       colorRole: '#000',
     });
   };
-  //Thay đổi quyền user
+  //Function when change selected role of user
+  //Role of Legal is oneness and never changes
   onChange = checkedList => {
     const dataFeatures = [...this.state.dataFeatures];
     if (checkedList.length === 0) {
@@ -140,6 +177,8 @@ class DetailUser extends React.Component {
         disableEditor: false,
         disableManager: false,
         features: [],
+        getIdRole: [],
+        disableButtonSave: true,
       });
     } else {
       checkedList.map(checked => {
@@ -148,45 +187,78 @@ class DetailUser extends React.Component {
             item => item.name === 'Admin',
           );
           const listFeatures = featuresNew[0].features;
+          const getIdRole = featuresNew[0].id;
           this.setState({
             disableAdmin: false,
             disableManager: true,
             disableEditor: true,
             features: listFeatures,
+            getIdRole: getIdRole,
+            disableButtonSave: false,
           });
         } else if (checked === 'Manager') {
           const featuresNew = dataFeatures.filter(
             item => item.name === 'Manager',
           );
           const listFeatures = featuresNew[0].features;
+          const getIdRole = featuresNew[0].id;
           this.setState({
             disableAdmin: false,
             disableManager: false,
             disableEditor: true,
             features: listFeatures,
+            getIdRole: getIdRole,
+            disableButtonSave: false,
           });
         } else {
           const featuresNew = dataFeatures.filter(
             item => item.name === 'Editor',
           );
           const listFeatures = featuresNew[0].features;
+          const getIdRole = featuresNew[0].id;
           this.setState({
             disableAdmin: false,
             disableManager: false,
             disableEditor: false,
             features: listFeatures,
+            getIdRole: getIdRole,
+            disableButtonSave: false,
           });
         }
       });
     }
   };
+  //Function save change role of user
+  handleSave = () => {
+    const userId = this.props.match.params.userId;
+    const { getIdRole } = this.state;
+    axios({
+      method: 'PUT',
+      url: `http://localhost:8080/api/v1/users/${userId}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
+      data: {
+        roleIds: [`${getIdRole}`],
+      },
+    }).then(res => {
+      console.log(res);
+      if (res.status) {
+        message.success('Thay đổi quyền cho người dùng thành công!');
+        let path = `/user-role`;
+        this.props.history.push(path);
+      }
+    });
+  };
   render() {
     const { dataUser, features } = this.state;
+    //Get  feature of user
     const featuresUser = [];
     features.map((feature, index) => {
       featuresUser.push(<li key={index}>{feature.displayName}</li>);
     });
-
+    //Choice component Info User or Role User
     let take = [];
     if (this.state.showUserInfo === true) {
       take = (
@@ -205,7 +277,11 @@ class DetailUser extends React.Component {
           </div>
           <hr />
           <div className="delete_user">
-            <Button type="danger" onClick={this.handleDelete}>
+            <Button
+              type="danger"
+              onClick={this.handleDelete}
+              disabled={this.state.disableButtonDelete}
+            >
               Delete User
             </Button>
           </div>
@@ -220,6 +296,14 @@ class DetailUser extends React.Component {
               <Icon type="question-circle-o" />
             </Tooltip>
           </p>
+          <Button
+            type="primary"
+            onClick={this.handleSave}
+            className="save-role"
+            disabled={this.state.disableButtonSave}
+          >
+            Lưu
+          </Button>
           <hr />
           <div className="role_detail_user">
             <Checkbox.Group
@@ -229,7 +313,7 @@ class DetailUser extends React.Component {
             >
               <Row style={{ width: '100%' }}>
                 <Col span={6}>
-                  <Checkbox value="Legal" disabled={true}>
+                  <Checkbox value="Legal" disabled={this.state.disableLegal}>
                     Legal
                   </Checkbox>
                 </Col>
@@ -275,7 +359,7 @@ class DetailUser extends React.Component {
           <h5>{dataUser.name}</h5>
           <h6>{dataUser.email}</h6>
         </div>
-        {/* phan chia components */}
+        {/* Divide components */}
         <div className="tag">
           <p
             onClick={this.handleUserInfo}

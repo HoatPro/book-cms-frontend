@@ -53,8 +53,7 @@ const UsersRolesWrapper = styled.div`
   }
 
   li {
-
-    font-size:16px;
+    font-size: 16px;
   }
   .tag {
     width: 350px;
@@ -84,6 +83,12 @@ const UsersRolesWrapper = styled.div`
     font-weight: 500;
     font-size: 17px;
     color: #000;
+  }
+  .save-role {
+    float: right;
+    margin-right: 100px;
+    margin-top:-50px;
+    width: 100px;
   }
   .role_user p {
     padding: 5px;

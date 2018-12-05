@@ -6,41 +6,43 @@ const FormItem = Form.Item;
 
 const ModalAddAuthor = Form.create()(
   class extends React.Component {
-    handleCancel = () => {
-      const { visible } = this.props;
-      this.props.closeModal(!visible);
-    };
-
+    //Function add author and props data component parents
     handleCreate = () => {
       const { visible } = this.props;
-
       this.props.form.validateFields((err, values) => {
-        if (err) {
-          return;
-        }
-        axios({
-          method: 'POST',
-          url: `http://localhost:8080/api/v1/authors`,
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: {
-            name: values.name,
-            birthDate: values.birthDate,
-            description: values.description,
-          },
-        })
-          .then(res => {
-            if (res.status) {
-              message.success('Thêm thể loại thành công');
-              window.location.reload();
-            }
+        if (!err) {
+          axios({
+            method: 'POST',
+            url: `http://localhost:8080/api/v1/authors`,
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            data: {
+              name: values.name,
+              birthDate: values.birthDate,
+              description: values.description,
+            },
           })
-          .catch(err => {
-            message.warning('Thêm thể loại lỗi ' + err);
-          });
+            .then(res => {
+              if (res.status) {
+                if (res.data.status === 0) {
+                  message.warning('Tác giả đã có ,vui lòng thêm tác giả khác!');
+                } else {
+                  message.success('Thêm tác giả thành công');
+                  window.location.reload();
+                }
+              }
+            })
+            .catch(err => {
+              message.error('Lỗi :' + err);
+            });
+          this.props.closeModal(!visible);
+        }
       });
+    };
+    handleCancel = () => {
+      const { visible } = this.props;
       this.props.closeModal(!visible);
     };
     render() {

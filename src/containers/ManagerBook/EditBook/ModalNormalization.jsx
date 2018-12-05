@@ -1,8 +1,9 @@
 import React from 'react';
 import { Table, Input, Form, Checkbox, Button, Modal, message } from 'antd';
-import { NormalizationWrapper } from './Normalization.style';
 import axios from 'axios';
+import { NormalizationWrapper } from './Normalization.style';
 const FormItem = Form.Item;
+//Component Edit row in table
 const EditableContext = React.createContext();
 const EditableRow = ({ form, index, ...props }) => (
   <EditableContext.Provider value={form}>
@@ -14,19 +15,16 @@ class EditableCell extends React.Component {
   state = {
     editing: false,
   };
-
   componentDidMount() {
     if (this.props.editable) {
       document.addEventListener('click', this.handleClickOutside, true);
     }
   }
-
   componentWillUnmount() {
     if (this.props.editable) {
       document.removeEventListener('click', this.handleClickOutside, true);
     }
   }
-
   toggleEdit = () => {
     const editing = !this.state.editing;
     this.setState({ editing }, () => {
@@ -35,14 +33,12 @@ class EditableCell extends React.Component {
       }
     });
   };
-
   handleClickOutside = e => {
     const { editing } = this.state;
     if (editing && this.cell !== e.target && !this.cell.contains(e.target)) {
       this.save();
     }
   };
-
   save = () => {
     const { record, handleSave } = this.props;
     this.form.validateFields((error, values) => {
@@ -110,8 +106,8 @@ class ModalNormalization extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: [],
-      dataObj: {},
+      data: [], //data table
+      dataObj: {}, //data convert
     };
     this.columns = [
       {
@@ -144,11 +140,12 @@ class ModalNormalization extends React.Component {
       },
     ];
   }
-
+  //Function change status
   changeStatus = str => {
     if (str == 'unchecked') return false;
     else if (str == 'checked') return true;
   };
+  //Get data chapters in Component EditBook
   componentWillReceiveProps(nextProps) {
     if (!nextProps.dataChapterNormalization) {
       this.setState({ data: [] });
@@ -173,6 +170,7 @@ class ModalNormalization extends React.Component {
       });
     }
   }
+  //Function save edit row
   handleSave = row => {
     const { data } = this.state;
     this.setState({
@@ -192,7 +190,7 @@ class ModalNormalization extends React.Component {
     });
   };
 
-  //Bang Expand
+  //Table Expand
   onExpand = record => {
     const dataExpand = record.expandations;
     const dataConvert = dataExpand.map((data, index) => {
@@ -201,7 +199,7 @@ class ModalNormalization extends React.Component {
         ...data,
       };
     });
-    //Lưu thông tin 1 bảng thông tin chuẩn hóa
+    //Save information 1 table normalization
     this.handleSaveData = row => {
       const { data } = this.state;
       if (row) {
@@ -279,7 +277,7 @@ class ModalNormalization extends React.Component {
       />
     );
   };
-  //Lưu thông tin tất cả bảng chuẩn hóa
+  //Funtion save all table normalization
   handleSaveAll = () => {
     const { visible } = this.props;
     const dataEdit = this.state.data;
@@ -305,13 +303,13 @@ class ModalNormalization extends React.Component {
       }
     });
     this.props.closeModal(!visible);
+    console.log(dataEdit);
   };
 
   handleCancel = () => {
     const { visible } = this.props;
     this.props.closeModal(!visible);
   };
-
   render() {
     const { visible } = this.props;
     const components = {
@@ -339,10 +337,12 @@ class ModalNormalization extends React.Component {
       <NormalizationWrapper>
         <Modal
           title="Kiểm tra nội dung chuẩn hóa"
-          footer={false}
           width={1000}
           visible={visible}
           onCancel={this.handleCancel}
+          onOk={this.handleSaveAll}
+          cancelText="Hủy"
+          okText="Lưu"
         >
           <Table
             className="table-modaledit"
@@ -354,16 +354,6 @@ class ModalNormalization extends React.Component {
             rowKey={record => record.key}
             expandedRowRender={record => this.onExpand(record)}
           />
-
-          <div className="footer-modaledit" style={{ marginTop: 20 }}>
-            <Button onClick={this.handleSaveAll} type="primary">
-              Lưu
-            </Button>
-            &nbsp;
-            <Button onClick={this.handleCancel} type="default">
-              Hủy
-            </Button>
-          </div>
         </Modal>
       </NormalizationWrapper>
     );

@@ -1,25 +1,24 @@
 import React from 'react';
-import { EditBookWapper } from './EditBook.style';
-import { Link } from 'react-router-dom';
-import TableBook from './TableBook';
-import TableSynthesis from './TableSynthesis';
 import axios from 'axios';
 import { Breadcrumb, Form, Input, Select, Button, Modal, message } from 'antd';
+import { Link } from 'react-router-dom';
+
+import { EditBookWapper } from './EditBook.style';
+import TableBook from './TableBook';
+import TableSynthesis from './TableSynthesis';
+
 const FormItem = Form.Item;
 const Option = Select.Option;
 const confirm = Modal.confirm;
 
 class EditBook extends React.Component {
   state = {
-    confirmDirty: false,
-    autoCompleteResult: [],
-    selectedRowKeys: [], // Check here to configure the default column
-    loading: false,
-    chapters: [],
-    objChapters: {},
+    chapters: [], // data table
+    objChapters: {}, // data convert chapters
     dataCategory: [],
     dataAuthor: [],
   };
+  //Function get bookId
   getBookId = () => {
     const slug = this.props.match.params.slug;
     const start = slug.lastIndexOf('-') + 1;
@@ -28,77 +27,84 @@ class EditBook extends React.Component {
   };
   async componentWillMount() {
     const bookId = this.getBookId();
-    //get Data category
+    //get data category
     axios({
       method: 'GET',
       url: `http://localhost:8080/api/v1/categories?fileds=name `,
       withCredentials: true,
-    }).then(res => {
-      const dataCategory = res.data.results.items;
-      this.setState({
-        dataCategory: dataCategory,
+    })
+      .then(res => {
+        const dataCategory = res.data.results.items;
+        this.setState({
+          dataCategory: dataCategory,
+        });
+      })
+      .catch(err => {
+        message.error('Lỗi : ' + err);
       });
-    });
-    //get Data Author
+    //get data author
     axios({
       method: 'GET',
       url: `http://localhost:8080/api/v1/authors?fileds=name `,
       withCredentials: true,
-    }).then(res => {
-      const dataAuthor = res.data.results.items;
-      this.setState({ dataAuthor: dataAuthor });
-    });
-    // get Data form
+    })
+      .then(res => {
+        const dataAuthor = res.data.results.items;
+        this.setState({ dataAuthor: dataAuthor });
+      })
+      .catch(err => {
+        message.error('Lỗi : ' + err);
+      });
+    // get data form
     axios({
       method: 'GET',
       url: `http://localhost:8080/api/v1/books/${bookId}`,
       withCredentials: true,
-    }).then(res => {
-      const infoBook = res.data.results;
-      this.props.form.setFieldsValue({
-        title: infoBook.title,
-        publishingCompany: infoBook.publishingCompany,
-        categories: infoBook.categories.map(category => category.id),
-        publicYear: infoBook.publicYear,
-        authors: infoBook.authors.map(author => author.id),
-        pageNumber: infoBook.pageNumber,
-        translator: infoBook.translator,
-        // fileName: infoBook.fileName,
-        status: infoBook.status.name,
-      });
-    });
-    //get data chapter
-    axios({
-      method: 'GET',
-      url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
-      withCredentials: true,
-    }).then(response => {
-      if (response.status) {
-        const chapters = response.data.results;
-        this.setState({ chapters: chapters }, function() {
-          this.convertChapters();
+    })
+      .then(res => {
+        const infoBook = res.data.results;
+        this.props.form.setFieldsValue({
+          title: infoBook.title,
+          publishingCompany: infoBook.publishingCompany,
+          categories: infoBook.categories.map(category => category.id),
+          publicYear: infoBook.publicYear,
+          authors: infoBook.authors.map(author => author.id),
+          pageNumber: infoBook.pageNumber,
+          translator: infoBook.translator,
+          // fileName: infoBook.fileName,
+          status: infoBook.status.name,
         });
-      }
-    });
+      })
+      .catch(err => {
+        message.error('Lỗi : ' + err);
+      });
+    //get data chapter
+    // axios({
+    //   method: 'GET',
+    //   url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
+    //   withCredentials: true,
+    // })
+    //   .then(response => {
+    //     if (response.status) {
+    //       const chapters = response.data.results;
+    //       this.setState({ chapters: chapters });
+    //     }
+    //   })
+    //   .catch(err => {
+    //     message.error('Lỗi : ' + err);
+    //   });
   }
-  convertChapters = () => {
-    const { chapters } = this.state;
-    const objChapters = {};
-    chapters.forEach(chapter => {
-      objChapters[chapter.id] = chapter;
-    });
-    this.setState({ objChapters });
-  };
 
+  //API update Info Book
   async updateApi(bookId, fieldsValue) {
-    fieldsValue['authors'] = fieldsValue['authors'].map(author => {
-      return {
-        id: author,
-      };
-    });
-    fieldsValue['categories'] = fieldsValue['categories'].map(category => {
+    const categories = fieldsValue['categories'].map(category => {
       return {
         id: category,
+      };
+    });
+    const authors = fieldsValue['authors'].map(author => {
+      return {
+        id: author,
       };
     });
     const options = {
@@ -114,8 +120,8 @@ class EditBook extends React.Component {
         publicYear: fieldsValue['publicYear'],
         pageNumber: fieldsValue['pageNumber'],
         translator: fieldsValue['translator'],
-        authors: fieldsValue['authors'],
-        categories: fieldsValue['categories'],
+        authors: authors,
+        categories: categories,
       },
     };
     const {
@@ -129,14 +135,13 @@ class EditBook extends React.Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    const slug = this.props.match.params.slug;
-    const bookId = slug.substring(slug.length - 24);
+    const bookId = this.getBookId();
     this.props.form.validateFieldsAndScroll((err, fieldsValue) => {
       this.updateApi(bookId, fieldsValue);
     });
   };
 
-  // Chuẩn hóa
+  // Normalization
   info = () => {
     const bookId = this.getBookId();
     confirm({
@@ -184,13 +189,11 @@ class EditBook extends React.Component {
     dataCategory.map(data => {
       selectCategory.push(<Option key={data.id}>{data.name}</Option>);
     });
-
     const { dataAuthor } = this.state;
     const selectAuthor = [];
     dataAuthor.map(data => {
       selectAuthor.push(<Option key={data.id}>{data.name}</Option>);
     });
-
     return (
       <EditBookWapper>
         <Breadcrumb>
@@ -281,7 +284,17 @@ class EditBook extends React.Component {
                 },
               ],
             })(
-              <Select mode="multiple" placeholder="Chọn tác giả">
+              <Select
+                showSearch
+                mode="multiple"
+                placeholder="Chọn tác giả"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option.props.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+              >
                 {selectAuthor}
               </Select>,
             )}
@@ -296,12 +309,21 @@ class EditBook extends React.Component {
                 },
               ],
             })(
-              <Select mode="multiple" placeholder="Chọn thể loại">
+              <Select
+                showSearch
+                mode="multiple"
+                placeholder="Chọn thể loại"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  option.props.children
+                    .toLowerCase()
+                    .indexOf(input.toLowerCase()) >= 0
+                }
+              >
                 {selectCategory}
               </Select>,
             )}
           </FormItem>
-
           {/*
           <FormItem {...formItemLayout} label="ISBN">
             {getFieldDecorator('isbn', {
@@ -314,9 +336,7 @@ class EditBook extends React.Component {
               ],
             })(<Input />)}
           </FormItem>
-
          */}
-
           <Button type="primary" htmlType="submit" className="btn-submit">
             Lưu
           </Button>
@@ -342,10 +362,10 @@ class EditBook extends React.Component {
           <Option value="thuy-linh">Thùy Linh(Nữ HN)</Option>
         </Select>
         <hr />
-
+        {/* Table chapters */}
         <TableBook bookId={bookId} />
-
         <hr />
+        {/* Manager synthesis and normalization */}
         <div className="allbook">
           <div className="manager_synthesis">
             <div className="manager_synthesis_left">
@@ -354,14 +374,13 @@ class EditBook extends React.Component {
             </div>
             <div className="manager_synthesis_right">
               <h4>Quản lý tổng hợp</h4>
-
               <TableSynthesis />
             </div>
           </div>
           <div className="manager_normalization">
             <div className="manager_normalization_left">
               <h3>Chuẩn hóa </h3>
-              <p>Chuẩn hóa tự động chạy</p>
+              <p>Chuẩn hóa bằng máy tự động chạy</p>
               <p>Vui lòng chờ 5-10 phút</p>
             </div>
             <div className="manager_normalization_right">

@@ -7,13 +7,30 @@ import Sider from './Sider';
 import Content from './Content';
 import Footer from './Footer';
 class Layout extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      userData: {},
+    };
+  }
+
+  componentWillMount() {
+    if (this.props.location.state) {
+      const userData = this.props.location.state;
+      this.setState({
+        userData: userData,
+      });
+    } else {
+      return;
+    }
+  }
   render() {
     const { children } = this.props;
     return (
       <LayoutWrapper>
         <div className="wrapper">
           <div className="header">
-            <Header />
+            <Header userData={this.state.userData} />
           </div>
           <div className="main_wrapper">
             <div className="sidebar">

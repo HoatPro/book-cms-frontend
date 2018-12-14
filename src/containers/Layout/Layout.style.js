@@ -26,18 +26,18 @@ const LayoutWrapper = styled.div`
 
   .content {
     width: 85%;
-    height:100%;
+    height: 100%;
     margin-left: 204px;
-    border:1px solid #ddd;
-    border-bottom-color:white;
-    border-top-color:white;
-    border-right-color:white;
+    border: 1px solid #ddd;
+    border-bottom-color: white;
+    border-top-color: white;
+    border-right-color: white;
   }
   .footer {
     width: 100%;
     height: 10%;
     border: 1px solid #ddd;
-    border-top:none;
+    border-top: none;
     float: right;
   }
 `;

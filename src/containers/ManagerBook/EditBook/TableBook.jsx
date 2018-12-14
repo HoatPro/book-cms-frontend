@@ -16,6 +16,7 @@ import ModalNormalization from './ModalNormalization';
 const { TextArea } = Input;
 const Option = Select.Option;
 const FormItem = Form.Item;
+
 //get data selected element table
 const dataSelected = [];
 const rowSelection = {
@@ -30,8 +31,8 @@ class TableBook extends React.Component {
     this.state = {
       title: '',
       content: '',
-      visibleAddChapter: false,
-      editVisible: false,
+      visibleAdd: false,
+      visibleEdit: false,
       dataTable: [],
       objChapters: {},
       chapters: [],
@@ -58,7 +59,10 @@ class TableBook extends React.Component {
           };
         });
 
-        this.setState({ dataTable: dataTable, chapters: chapters }, function() {
+        this.setState({
+          dataTable: dataTable,
+          chapters: chapters },
+          function() {
           this.convertChapters();
         });
       }
@@ -133,19 +137,19 @@ class TableBook extends React.Component {
   // Function cancel
   handleCancel = () => {
     this.setState({
-      editVisible: false,
+      visibleEdit: false,
       loading: false,
-      visibleAddChapter: false,
+      visibleAdd: false,
     });
   };
   //Function add chapter
-  handleAddChapter = visibleAddChapter => {
+  handleAddChapter = visibleAdd => {
     this.props.form.setFieldsValue({
       modalTitleAdd: '',
       modalContentAdd: '',
     });
     this.setState({
-      visibleAddChapter,
+      visibleAdd,
     });
   };
   handleSaveAddChapter = () => {
@@ -175,7 +179,7 @@ class TableBook extends React.Component {
               message.error('Thêm chương có orderNo đã tồn tại!!');
             } else {
               this.setState({
-                visibleAddChapter: false,
+                visibleAdd: false,
                 loading: false,
               });
               message.success('Thêm chương thành công !');
@@ -207,7 +211,7 @@ class TableBook extends React.Component {
               message.error('Thêm chương có orderNo đã tồn tại!!');
             } else {
               this.setState({
-                visibleAddChapter: false,
+                visibleAdd: false,
                 loading: false,
               });
               message.success('Thêm chương thành công !');
@@ -230,7 +234,7 @@ class TableBook extends React.Component {
       modalContentEdit: objChapters[key].content,
     });
     this.setState({
-      editVisible: true,
+      visibleEdit: true,
       keyModal: key,
       loading: true,
     });
@@ -259,7 +263,7 @@ class TableBook extends React.Component {
             message.success('Sửa chương thành công !!');
             this.setState(
               {
-                editVisible: false,
+                visibleEdit: false,
                 dataTable: dataTable.map(item => {
                   if (item.key !== keyModal) return item;
                   return {
@@ -386,7 +390,7 @@ class TableBook extends React.Component {
         {/* Modal Add  chapter */}
         <div className="modal-add-chapter">
           <Modal
-            visible={this.state.visibleAddChapter}
+            visible={this.state.visibleAdd}
             title="Thêm chương"
             okText="Thêm"
             cancelText="Hủy"
@@ -406,7 +410,7 @@ class TableBook extends React.Component {
         </div>
         {/* Modal Edit chapter */}
         <Modal
-          visible={this.state.editVisible}
+          visible={this.state.visibleEdit}
           title="Sửa chương"
           onOk={this.handleSave}
           okText="Lưu"

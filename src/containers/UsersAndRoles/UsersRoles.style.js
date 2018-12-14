@@ -21,7 +21,7 @@ const UsersRolesWrapper = styled.div`
     margin-top: 50px;
     font-size: 20px;
     font-weight: bold;
-    margin-left: 4px;
+    margin-left: 0px;
     padding-left: 20px;
     color: #40a9ff;
   }
@@ -33,6 +33,7 @@ const UsersRolesWrapper = styled.div`
   }
   .table_user {
     width: 95%;
+    margin-left:20px;
   }
   .form_user_infomation {
     width: 50%;

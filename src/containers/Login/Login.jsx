@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Form, Icon, Input, Button, Checkbox, message } from 'antd';
 import { LoginWrapper } from './Login.style';
 import axios from 'axios';
+import { isThisSecond } from 'date-fns';
 
 const FormItem = Form.Item;
 class Login extends Component {
@@ -51,11 +52,9 @@ class Login extends Component {
           .catch(err => {
             console.log(err);
           });
-        let path = '/partner';
-        this.props.history.push(path);
-        console.log(values);
-        this.setState({
-          dataUser: values.email,
+        this.props.history.push({
+          pathname: '/partner',
+          state: { values },
         });
       }
     });

@@ -78,21 +78,6 @@ class EditBook extends React.Component {
       .catch(err => {
         message.error('Lỗi : ' + err);
       });
-    //get data chapter
-    // axios({
-    //   method: 'GET',
-    //   url: `http://localhost:8080/api/v1/books/${bookId}/chapters`,
-    //   withCredentials: true,
-    // })
-    //   .then(response => {
-    //     if (response.status) {
-    //       const chapters = response.data.results;
-    //       this.setState({ chapters: chapters });
-    //     }
-    //   })
-    //   .catch(err => {
-    //     message.error('Lỗi : ' + err);
-    //   });
   }
 
   //API update Info Book
@@ -263,7 +248,7 @@ class EditBook extends React.Component {
                   message: 'Tên file đã upload lên',
                 },
               ],
-            })(<Input />)}
+            })(<Input disabled={true}/>)}
           </FormItem>
           <FormItem {...formItemLayout} label="Trạng thái ">
             {getFieldDecorator('status', {
